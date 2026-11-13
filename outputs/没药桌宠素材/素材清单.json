@@ -1,0 +1,561 @@
+{
+  "version": 1,
+  "character": "没药",
+  "idle": {
+    "id": "idle",
+    "file": "透明WebM/idle.webm",
+    "durationMs": 4000,
+    "loop": true,
+    "renderScale": 1.0,
+    "renderOffset": [
+      0.0,
+      0.0
+    ],
+    "renderAnchor": "bottom-center",
+    "playbackFile": "透明WebM/idle.webm"
+  },
+  "additionalIdleAnimations": [
+    {
+      "id": "idle2",
+      "name": "待机动作2",
+      "file": "透明WebM/idle2.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle2.webm",
+      "loop": true
+    },
+    {
+      "id": "idle03",
+      "name": "待机动作03 · 吹单簧管",
+      "file": "透明WebM/idle03.webm",
+      "durationMs": 6042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle03.webm",
+      "loop": false
+    },
+    {
+      "id": "idle04",
+      "name": "待机动作04 · 贴贴枕头",
+      "file": "透明WebM/idle04.webm",
+      "durationMs": 6042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle04.webm",
+      "loop": false
+    },
+    {
+      "id": "idle05",
+      "name": "待机动作05 · 玩掌机",
+      "file": "透明WebM/idle05.webm",
+      "durationMs": 7042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle05.webm",
+      "loop": false
+    },
+    {
+      "id": "idle06",
+      "name": "待机动作06 · 玩手机",
+      "file": "透明WebM/idle06.webm",
+      "durationMs": 7042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle06.webm",
+      "loop": false
+    }
+  ],
+  "variants": [
+    {
+      "id": "01",
+      "name": "招手/打招呼",
+      "file": "透明WebM/01.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/01.webm",
+      "line": "来啦！今天也一起把小事做好吧。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "04",
+      "name": "灵感",
+      "file": "透明WebM/04.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/04.webm",
+      "line": "叮！我有一个想法！",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "05",
+      "name": "得意",
+      "file": "透明WebM/05.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/05.webm",
+      "line": "轻轻松松",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "08",
+      "name": "贴贴",
+      "file": "透明WebM/08.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/08.webm",
+      "line": "来摸摸头",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "09",
+      "name": "傲娇",
+      "file": "透明WebM/09.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/09.webm",
+      "line": "哼，才没有在等你",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "13",
+      "name": "小生气",
+      "file": "透明WebM/13.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/13.webm",
+      "line": "等一下...",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "14",
+      "name": "困倦",
+      "file": "透明WebM/14.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/14.webm",
+      "line": "好困...",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "17",
+      "name": "偷吃",
+      "file": "透明WebM/17.webm",
+      "durationMs": 5042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/17.webm",
+      "line": "这是保持思考的必要消耗！",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "18",
+      "name": "庆祝",
+      "file": "透明WebM/18.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/18.webm",
+      "line": "完成啦！",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "20",
+      "name": "比心",
+      "file": "透明WebM/20.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/20.webm",
+      "line": "今日份喜欢，已经送到桌面啦。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "21",
+      "name": "奉侍契约",
+      "file": "透明WebM/21.webm",
+      "durationMs": 4042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/21.webm",
+      "line": "以女仆之名起誓，从今往后，你的桌面与心事都交给我照料。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "22",
+      "name": "徽章约定",
+      "file": "透明WebM/22.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/22.webm",
+      "line": "这枚徽章别好了，从今天起，我就是守在你桌面的女仆。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "24",
+      "name": "整理收藏",
+      "file": "透明WebM/24.webm",
+      "durationMs": 6042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/24.webm",
+      "line": "笔记、想法，还有你交代的事……我都好好收着。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "25",
+      "name": "奉茶小憩",
+      "file": "透明WebM/25.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/25.webm",
+      "line": "呼——先喝口热的，慢慢想，我陪着你。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "26",
+      "name": "信赖亲近",
+      "file": "透明WebM/26.webm",
+      "durationMs": 4042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/26.webm",
+      "line": "只在你面前才会卸下防备哦，要温柔对待我。",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "knockback",
+      "name": "弹飞空翻倒地起身",
+      "file": "透明WebM/knockback.webm",
+      "durationMs": 6000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/knockback.webm",
+      "line": "呜哇！……头、头好晕……",
+      "bubble": "由桌宠程序独立显示"
+    }
+  ],
+  "dragAnimation": {
+    "id": "drag",
+    "name": "拖拽",
+    "file": "透明WebM/drag.webm",
+    "durationMs": 4000,
+    "renderScale": 1.0,
+    "renderOffset": [
+      0.0,
+      0.0
+    ],
+    "renderAnchor": "bottom-center",
+    "playbackFile": "透明WebM/drag.webm"
+  },
+  "landingAnimation": {
+    "id": "landing",
+    "name": "落地",
+    "file": "透明WebM/landing.webm",
+    "durationMs": 2000,
+    "renderScale": 1.0,
+    "renderOffset": [
+      0.0,
+      0.0
+    ],
+    "renderAnchor": "bottom-center",
+    "playbackFile": "透明WebM/landing.webm"
+  },
+  "quotaAnimation": {
+    "id": "quota",
+    "name": "查阅额度",
+    "file": "透明WebM/quota.webm",
+    "durationMs": 4000,
+    "renderScale": 1.0,
+    "renderOffset": [
+      0.0,
+      0.0
+    ],
+    "renderAnchor": "bottom-center",
+    "playbackFile": "透明WebM/quota.webm"
+  },
+  "workAnimations": [
+    {
+      "id": "work01",
+      "name": "收到任务",
+      "file": "透明WebM/work01.webm",
+      "durationMs": 4042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work01.webm",
+      "line": "收到，马上开工！",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    },
+    {
+      "id": "work02",
+      "name": "处理任务",
+      "file": "透明WebM/work02.webm",
+      "durationMs": 6042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work02.webm",
+      "line": "上班中...",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    },
+    {
+      "id": "work03",
+      "name": "整理归档文件",
+      "file": "透明WebM/work03.webm",
+      "durationMs": 5042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work03.webm",
+      "line": "打扫完了！",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    },
+    {
+      "id": "work04",
+      "name": "翻阅工作资料",
+      "file": "透明WebM/work04.webm",
+      "durationMs": 5042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work04.webm",
+      "line": "我需要思考...",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    },
+    {
+      "id": "work05",
+      "name": "放大镜查看细节",
+      "file": "透明WebM/work05.webm",
+      "durationMs": 4042,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work05.webm",
+      "line": "让我看看~",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    }
+  ],
+  "movementAnimations": [
+    {
+      "id": "move02",
+      "number": "02",
+      "name": "跑步（向右）",
+      "file": "透明WebM/move02.webm",
+      "durationMs": 11000,
+      "moveStartMs": 4750,
+      "moveStopMs": 7500,
+      "sourceFacing": "right",
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/move02.webm"
+    },
+    {
+      "id": "move02left",
+      "number": "02",
+      "name": "跑步（向左）",
+      "file": "透明WebM/move02left.webm",
+      "durationMs": 9042,
+      "moveStartMs": 1917,
+      "moveStopMs": 5250,
+      "sourceFacing": "left",
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/move02left.webm"
+    },
+    {
+      "id": "move01left",
+      "number": "01",
+      "name": "走路（向左）",
+      "file": "透明WebM/move01left.webm",
+      "durationMs": 5042,
+      "moveStartMs": 1000,
+      "moveStopMs": 3250,
+      "sourceFacing": "left",
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/move01left.webm"
+    },
+    {
+      "id": "move01right",
+      "number": "01",
+      "name": "走路（向右）",
+      "file": "透明WebM/move01right.webm",
+      "durationMs": 5042,
+      "moveStartMs": 750,
+      "moveStopMs": 3250,
+      "sourceFacing": "right",
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/move01right.webm"
+    },
+    {
+      "id": "move03left",
+      "number": "03",
+      "name": "踮脚悬浮（向左）",
+      "file": "透明WebM/move03left.webm",
+      "durationMs": 9100,
+      "moveStartMs": 3125,
+      "moveStopMs": 7750,
+      "sourceFacing": "left",
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/move03left.webm",
+      "movementAngleRange": [
+        45,
+        80
+      ],
+      "movementSpeed": 0.65
+    },
+    {
+      "id": "move03right",
+      "number": "03",
+      "name": "踮脚悬浮（向右）",
+      "file": "透明WebM/move03right.webm",
+      "durationMs": 9100,
+      "moveStartMs": 3300,
+      "moveStopMs": 7750,
+      "sourceFacing": "right",
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/move03right.webm",
+      "movementAngleRange": [
+        45,
+        80
+      ],
+      "movementSpeed": 0.65
+    }
+  ]
+}
