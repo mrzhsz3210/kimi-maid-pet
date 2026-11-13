@@ -422,15 +422,15 @@ class Pet(QWidget):
             self.play(random.choices(self.idles,weights=[7,3][:len(self.idles)])[0],'idle')
             return
         if self.task_active:
+            # Working state shows work animations only — never idle fillers.
             work=self.regular_work_animations()
+            if not work:
+                self.play(random.choices(self.idles,weights=[4,1][:len(self.idles)])[0],'idle')
+                return
             previous=self.current.get('id') if self.current else None
-            groups=[('working',work),('idle',self.idles)] if work else [('idle',self.idles)]
-            candidates=[(mode,[v for v in pool if v['id']!=previous]) for mode,pool in groups]
-            candidates=[g for g in candidates if g[1]]
-            if not candidates:return
-            mode,pool=random.choices(candidates,weights=[35 if mode=='working' else 65 for mode,pool in candidates])[0]
-            self.last_task_group=mode
-            self.play(random.choice(pool),mode)
+            pool=[v for v in work if v['id']!=previous] or work
+            self.last_task_group='working'
+            self.play(random.choice(pool),'working')
             return
         if self.try_leisure():return
         item=random.choices(self.idles,weights=[4,1][:len(self.idles)])[0]
