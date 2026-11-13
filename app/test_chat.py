@@ -109,7 +109,7 @@ class ChatUiTests(unittest.TestCase):
     def test_menu_submenus_and_idle_preview(self):
         menu=self.pet.context_menu();actions={a.text():a for a in menu.actions()}
         self.assertEqual(len(actions['互动差分动画'].menu().actions()),16)
-        self.assertEqual(len(actions['工作差分动画'].menu().actions()),5)
+        self.assertEqual(len(actions['工作差分动画'].menu().actions()),6)
         self.assertTrue(actions['工作差分动画'].menu().actions()[0].isEnabled())
         idle=actions['待机差分动画'].menu().actions()
         self.assertEqual(idle[1].text(),'待机动作02');idle[1].trigger()

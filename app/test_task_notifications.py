@@ -61,5 +61,6 @@ class UiTests(unittest.TestCase):
         c.active['turns'].append(c.running_turn)
         with patch.object(p,'task_completed') as success,patch.object(p,'play_click_sound') as sound:
             c.failed('未完成',False);success.assert_not_called();sound.assert_not_called()
+        self.assertEqual(p.mode,'work-failure');self.assertEqual(p.current['id'],'work06')
 
 if __name__=='__main__':unittest.main()

@@ -14,7 +14,7 @@ class FakePet(QObject):
         super().__init__()
         self.chat=None
         self.settings=Mock();self.settings.value.return_value=True
-        for name in ('task_started','task_finished','task_progress','task_completed','task_result','say'):
+        for name in ('task_started','task_finished','task_failed','task_progress','task_completed','task_result','say'):
             setattr(self,name,Mock())
 
 def write_state(root, workspace, session, **fields):
@@ -48,6 +48,7 @@ class WatcherSyncTests(unittest.TestCase):
         write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason='error')
         self.sync.poll()
         self.pet.task_completed.assert_not_called()
+        self.pet.task_failed.assert_called_once()
         self.assertIn('还没有完成',self.pet.task_progress.call_args.args[0])
     def test_old_sessions_are_ignored(self):
         write_state(self.tmp.name,'w','old',title='旧任务',lastTurnReason=None,

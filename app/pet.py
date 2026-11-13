@@ -452,7 +452,8 @@ class Pet(QWidget):
             self.next_leisure_at=now+15;return True
         return False
     def regular_work_animations(self):
-        return [v for v in self.work_slots if v and v['id']!='work01' and self.asset_path(v).is_file()]
+        # work01 is the task-opening, work06 is reserved for failures.
+        return [v for v in self.work_slots if v and v['id'] not in ('work01','work06') and self.asset_path(v).is_file()]
     def task_started(self):
         self.note_interaction()
         self.task_active=True
@@ -465,6 +466,11 @@ class Pet(QWidget):
     def task_finished(self):
         self.task_active=False
         if self.mode in ('work-start','working','idle'):self.idle()
+    def task_failed(self):
+        self.task_active=False
+        failure=next((v for v in self.work_slots if v and v['id']=='work06' and self.asset_path(v).is_file()),None)
+        if failure and not self.dock_edge:self.play(failure,'work-failure')
+        else:self.idle()
     def return_transition_item(self,item):
         transition=item['returnTransition']
         return {'id':'return-'+item['id'],'file':transition['file'],

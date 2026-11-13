@@ -33,7 +33,7 @@
       "id": "idle03",
       "name": "待机动作03 · 吹单簧管",
       "file": "透明WebM/idle03.webm",
-      "durationMs": 6042,
+      "durationMs": 7000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -47,7 +47,7 @@
       "id": "idle04",
       "name": "待机动作04 · 贴贴枕头",
       "file": "透明WebM/idle04.webm",
-      "durationMs": 6042,
+      "durationMs": 7000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -61,7 +61,7 @@
       "id": "idle05",
       "name": "待机动作05 · 玩掌机",
       "file": "透明WebM/idle05.webm",
-      "durationMs": 7042,
+      "durationMs": 8000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -75,7 +75,7 @@
       "id": "idle06",
       "name": "待机动作06 · 玩手机",
       "file": "透明WebM/idle06.webm",
-      "durationMs": 7042,
+      "durationMs": 8000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -389,7 +389,7 @@
       "id": "work03",
       "name": "整理归档文件",
       "file": "透明WebM/work03.webm",
-      "durationMs": 5042,
+      "durationMs": 6000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -404,7 +404,7 @@
       "id": "work04",
       "name": "翻阅工作资料",
       "file": "透明WebM/work04.webm",
-      "durationMs": 5042,
+      "durationMs": 6000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -419,7 +419,7 @@
       "id": "work05",
       "name": "放大镜查看细节",
       "file": "透明WebM/work05.webm",
-      "durationMs": 4042,
+      "durationMs": 5000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -428,6 +428,21 @@
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/work05.webm",
       "line": "让我看看~",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    },
+    {
+      "id": "work06",
+      "name": "报错趴地晕眩",
+      "file": "透明WebM/work06.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work06.webm",
+      "line": "呜……又报错啦……",
       "bubble": "仅手动互动触发，自动工作播放不显示台词"
     }
   ],

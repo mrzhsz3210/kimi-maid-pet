@@ -307,6 +307,7 @@ class ChatController(QObject):
         chat=self.running_chat
         self.running_turn.update(status='interrupted' if cancelled else 'failed',error=error)
         self.finish()
+        if not cancelled:self.pet.task_failed()
         self.pet.task_result('主人，我先停下来啦。' if cancelled else '唔，主人，这次遇到一点困难，还没有完成。',error,lambda:self.open_history(chat['id']))
 
     def stop(self):

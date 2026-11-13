@@ -33,7 +33,7 @@ def run(root):
         for item in items:
             frames=pet.load(item);assert abs(len(frames)-round(item['durationMs']*item.get('fps',24)/1000))<=1
             assert frames[0].width()==pet.frame_size
-        assert len(pet.variants)==16 and len(items)==24+len(pet.manifest.get('additionalIdleAnimations',[]))+len(pet.movement_slots);report['checks'].append(f'{len(items)}段动画可解码，含移动差分')
+        assert len(pet.variants)==16 and len(items)==19+len(pet.manifest.get('additionalIdleAnimations',[]))+len(pet.work_slots)+len(pet.movement_slots);report['checks'].append(f'{len(items)}段动画可解码，含移动差分')
         assert (root/'app/sounds/click.wav').is_file()
         assert next(v for v in pet.variants if v['id']=='14') in items
         for item in items:

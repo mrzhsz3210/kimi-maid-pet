@@ -155,6 +155,8 @@ class DesktopTaskSync(QObject):
         if reason == TERMINAL_OK:
             self.pet.task_completed('Kimi 已报告「' + title + '」完成，细节请到 Kimi 查看。', lambda: self.details(session))
         else:
+            if not self.running and not (self.pet.chat and self.pet.chat.running_turn):
+                self.pet.task_failed()
             self._progress(session, '主人，任务还没有完成。',
                            '「' + title + '」这次处理没有成功（' + str(reason) + '），请到 Kimi 查看并处理。', repeat=True)
 
