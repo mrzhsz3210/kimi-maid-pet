@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt, QPoint, QTimer
 from PySide6.QtTest import QTest
 from pet import Pet,clamp_position
-from quota import quota_windows
 
 app=QApplication.instance() or QApplication([])
 class Tests(unittest.TestCase):
@@ -21,37 +20,17 @@ class Tests(unittest.TestCase):
         with patch('pet.random.choices',return_value=[self.pet.idles[1]]) as choice:
             self.pet.idle();self.assertEqual(choice.call_args.kwargs['weights'],[4,1])
     def test_click_disambiguation(self):
-        with patch.object(self.pet,'single_click') as single,patch.object(self.pet,'quota') as quota:
-            # Timer slot was connected earlier; inspect resulting state instead below.
+        with patch.object(self.pet,'single_click') as single:
             QTest.mouseClick(self.pet,Qt.MouseButton.LeftButton,pos=QPoint(160,160))
             QTest.qWait(80);QTest.mouseClick(self.pet,Qt.MouseButton.LeftButton,pos=QPoint(160,160))
-            quota.assert_called_once();self.pet.click_timer.stop()
+            single.assert_called_once();self.pet.click_timer.stop()
         self.pet.last_click=None
         QTest.mouseClick(self.pet,Qt.MouseButton.LeftButton,pos=QPoint(160,160));QTest.qWait(300)
         self.assertEqual(self.pet.mode,'variant');self.assertTrue(self.pet.bubble.isVisible())
         self.assertLessEqual(self.pet.bubble_timer.remainingTime(),4000)
-    def test_variant_return_and_quota_stale(self):
+    def test_variant_return(self):
         self.pet.choose(self.pet.variants[0]);self.pet.started=time.monotonic()-4.01;self.pet.animate()
         self.assertEqual(self.pet.mode,'idle')
-        self.pet.quota_generation=1;self.pet.generation=2
-        self.pet.quota_failed('obsolete');self.assertNotIn('obsolete',self.pet.bubble.findChildren(__import__('PySide6.QtWidgets',fromlist=['QLabel']).QLabel)[0].text())
-    def test_quota_parsing(self):
-        windows=quota_windows({'version':'2.5.2','loggedIn':True})
-        self.assertEqual(len(windows),1);self.assertIn('Kimi Code CLI',windows[0]['name'])
-        self.assertIsNone(windows[0]['remaining'])
-    def test_loading_then_progress_and_resume(self):
-        with patch('pet.QuotaWorker') as worker:
-            self.pet.quota()
-            self.assertEqual(self.pet.mode,'quota')
-            self.assertEqual(self.pet.current['id'],self.pet.manifest.get('quotaAnimation',self.pet.idles[0])['id'])
-            from PySide6.QtWidgets import QLabel,QProgressBar
-            self.assertEqual(self.pet.bubble.findChildren(QLabel)[0].text(),'让我看看 Kimi 的状态。。。。。。')
-            self.pet.quota_ready([{'name':'5小时','remaining':76,'resetsAt':None},{'name':'一周','remaining':91,'resetsAt':None}])
-            self.assertEqual([b.value() for b in self.pet.bubble.findChildren(QProgressBar)],[76,91])
-            self.pet.started=time.monotonic()-4.1;self.pet.animate()
-            self.assertEqual(self.pet.mode,'idle');self.assertTrue(self.pet.bubble.isVisible())
-            self.pet.dismiss_bubble();self.assertEqual(self.pet.mode,'idle')
-            self.pet.worker=None
     def test_menu_contains_all_variants_and_exit(self):
         actions=[]
         def inspect():
@@ -87,12 +66,6 @@ class Tests(unittest.TestCase):
             with patch('pet.gzip.decompress',side_effect=AssertionError('idle should stay warm')):
                 self.pet.animate()
                 self.assertEqual(self.pet.mode,'idle')
-    def test_quota_zero_percent_is_readable_outside_bar(self):
-        from PySide6.QtWidgets import QLabel,QProgressBar
-        self.pet.bubble.quota([{'name':'5小时','remaining':0,'resetsAt':None}])
-        self.assertTrue(any('剩余 0%' in label.text() for label in self.pet.bubble.findChildren(QLabel)))
-        self.assertFalse(self.pet.bubble.findChildren(QProgressBar)[0].isTextVisible())
-
 class BoundaryTests(unittest.TestCase):
     def test_edges_and_corners(self):
         from PySide6.QtCore import QRect,QSize

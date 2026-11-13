@@ -37,13 +37,11 @@ class PreferencesTests(unittest.TestCase):
   self.assertEqual(p.bubble.result_view.toPlainText(),'真实任务进展')
   p.show_bubble_settings();self.assertFalse(p.bubble.is_size_preview)
   p.bubble_settings_dialog.reject();self.assertTrue(p.bubble.isVisible())
- def test_task_mute_keeps_interaction_and_quota(self):
+ def test_task_mute_keeps_interaction_bubbles(self):
   p=self.pet;p.task_progress('进展','处理任务',lambda:None);self.assertTrue(p.bubble.isVisible())
   p.set_task_bubbles_disabled(True);self.assertFalse(p.bubble.isVisible())
   p.task_progress('新进展','不显示',lambda:None);p.task_result('任务完成','不显示',lambda:None);self.assertFalse(p.bubble.isVisible())
   p.say('互动气泡');self.assertTrue(p.bubble.isVisible());p.dismiss_bubble()
-  p.bubble.quota([{'name':'5小时','remaining':70,'resetsAt':None}]);self.assertTrue(p.bubble.isVisible())
-  p.set_task_bubbles_disabled(True);self.assertTrue(p.bubble.isVisible())
  def test_sound_mute_and_menu_options(self):
   p=self.pet;p.set_sound_disabled(True)
   with patch('winsound.PlaySound') as sound:p.play_click_sound();sound.assert_not_called()

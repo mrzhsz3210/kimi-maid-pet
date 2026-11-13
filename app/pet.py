@@ -1,13 +1,11 @@
 import json, random, sys, time, threading, gzip, os
 from pathlib import Path
 from collections import OrderedDict
-from datetime import datetime
 from PIL import Image
 from PySide6.QtCore import Qt, QTimer, QThread, Signal, QPoint, QPointF, QRect, QRectF, QSize, QSettings, QEvent
 from PySide6.QtGui import QImage, QPixmap, QPainter, QRegion, QCursor, QIcon, QTransform
-from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QProgressBar, QMenu, QMessageBox, QProgressDialog, QPushButton, QSystemTrayIcon, QTextBrowser, QSlider, QDialog, QCheckBox
+from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QMenu, QMessageBox, QProgressDialog, QPushButton, QSystemTrayIcon, QTextBrowser, QSlider, QDialog, QCheckBox
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
-from quota import read_quota, quota_windows
 from version import VERSION
 from movement import plan_movement, movement_fraction
 
@@ -23,15 +21,6 @@ def clamp_position(position,size,area):
     max_y=max(area.top(),area.bottom()-size.height()+1)
     return QPoint(max(area.left(),min(position.x(),max_x)),
                   max(area.top(),min(position.y(),max_y)))
-
-class QuotaWorker(QThread):
-    ready=Signal(object)
-    failed=Signal(str)
-    def __init__(self,parent=None):
-        super().__init__(parent);self.cancel=threading.Event()
-    def run(self):
-        try: self.ready.emit(quota_windows(read_quota(cancel=self.cancel)))
-        except Exception as error: self.failed.emit(str(error))
 
 class Bubble(QWidget):
     dismiss_requested=Signal()
@@ -103,22 +92,6 @@ class Bubble(QWidget):
         button=QPushButton('详情');button.setStyleSheet('color:#60358c;background:#eee5f7;border:0;border-radius:7px;padding:7px;')
         button.clicked.connect(lambda checked=False:details());self.layout.addWidget(button)
         self.set_scale_percent(self.scale_percent);self.show()
-    def quota(self,windows):
-        self.is_size_preview=False
-        self.is_task_bubble=False
-        self.is_task_progress=False
-        self.is_quota_result=True
-        self.base_width=256;self.setFixedWidth(round(256*self.scale_percent/100))
-        self.clear();self.label('Kimi 状态')
-        for window in windows:
-            value=window['remaining']
-            self.label(window['name']+' · '+(f'剩余 {value:g}%' if value is not None else '暂未提供'))
-            bar=QProgressBar();bar.setRange(0,100)
-            bar.setValue(round(value) if value is not None else 0);bar.setTextVisible(False);self.layout.addWidget(bar)
-            if window['resetsAt']:
-                self.label('重置：'+datetime.fromtimestamp(window['resetsAt']).strftime('%m月%d日 %H:%M'))
-        self.set_scale_percent(self.scale_percent);self.show()
-
     def size_preview(self):
         self.clear();self.is_size_preview=True;self.is_task_bubble=False
         self.is_task_progress=False;self.is_quota_result=True;self.base_width=300
@@ -139,7 +112,7 @@ class Pet(QWidget):
         self.cache=OrderedDict();self.pinned_frames={};self.frames=[];self.current=None;self.mode='idle';self.index=0
         self.frame_size=min(512,max(256,round(256*max(s.devicePixelRatio() for s in QApplication.screens()))))
         self.transition=None
-        self.bubble=Bubble();self.generation=0;self.worker=None;self.quota_inflight=False;self.dragging=False;self.last_click=None
+        self.bubble=Bubble();self.generation=0;self.dragging=False;self.last_click=None
         self.bubble.dismiss_requested.connect(self.dismiss_bubble)
         self.chat=None
         self.task_active=False
@@ -173,7 +146,7 @@ class Pet(QWidget):
         self.idle()
         # User prefers immediate interaction: decode all actions once at startup
         # and retain them even while hidden, without running the animation timer.
-        items=self.idles+self.extra_idles+self.variants+self.movement_slots+[v for v in self.work_slots if v and self.asset_path(v).is_file()]+[self.manifest[name] for name in ('dragAnimation','landingAnimation','quotaAnimation') if self.manifest.get(name)]
+        items=self.idles+self.extra_idles+self.variants+self.movement_slots+[v for v in self.work_slots if v and self.asset_path(v).is_file()]+[self.manifest[name] for name in ('dragAnimation','landingAnimation') if self.manifest.get(name)]
         items += [self.return_transition_item(v) for v in self.variants if v.get('returnTransition')]
         progress=None
         if QApplication.platformName()!='offscreen':
@@ -242,7 +215,7 @@ class Pet(QWidget):
         now=time.monotonic() if now is None else now
         return (not self.dock_edge and not self.auto_movement_disabled and bool(self.movement_slots) and now-self.last_interaction>=15.0
                 and now>=self.movement_ready_at and not self.desktop_hidden()
-                and not self.task_active and not self.quota_inflight and not self.dragging
+                and not self.task_active and not self.dragging
                 and not self.pointer_down and not self.click_timer.isActive()
                   and not (getattr(self,'size_dialog',None) and self.size_dialog.isVisible())
                   and not (getattr(self,'bubble_settings_dialog',None) and self.bubble_settings_dialog.isVisible())
@@ -464,7 +437,7 @@ class Pet(QWidget):
     def try_leisure(self):
         now=time.monotonic()
         if (now<self.next_leisure_at or now-self.last_interaction<15 or self.dock_edge
-                or self.desktop_hidden() or self.task_active or self.quota_inflight or self.dragging
+                or self.desktop_hidden() or self.task_active or self.dragging
                 or self.pointer_down or self.click_timer.isActive() or QApplication.activePopupWidget() is not None
                 or any(getattr(self,n,None) and getattr(self,n).isVisible() for n in ('size_dialog','bubble_settings_dialog'))):return False
         if self.next_leisure_group=='movement' and self.movement_allowed(now):
@@ -606,7 +579,6 @@ class Pet(QWidget):
     def dismiss_bubble(self):
         self.bubble_timer.stop()
         self.bubble.hide()
-        if self.mode=='quota':self.idle()
     def task_result(self,title,text,details):
         if self.task_bubbles_disabled:return
         if self.speech_hidden():return
@@ -714,7 +686,7 @@ class Pet(QWidget):
             slider.valueChanged.connect(lambda value:label.setText(f'对话框大小：{value}%（50%—150%）'))
             reset=QPushButton('恢复默认大小',dialog);reset.clicked.connect(lambda:slider.setValue(100))
             mute=QCheckBox('禁用聊天气泡提醒',dialog)
-            mute.setToolTip('关闭任务接收、进展、异常和完成气泡；互动与额度气泡不受影响。')
+            mute.setToolTip('关闭任务接收、进展、异常和完成气泡；互动气泡不受影响。')
             mute.toggled.connect(self.set_task_bubbles_disabled)
             done=QPushButton('完成',dialog);done.clicked.connect(dialog.accept)
             dialog.finished.connect(self.finish_bubble_preview)
@@ -833,32 +805,13 @@ class Pet(QWidget):
         # Single clicks pick from interaction variants only; work animations
         # belong to real tasks (and stay previewable via the context menu).
         return self.variants
-    def quota(self):
-        self.note_interaction()
-        self.click_timer.stop();self.last_click=None;self.generation+=1;token=self.generation
-        self.play_click_sound()
-        if not self.dock_edge:self.play(self.manifest.get('quotaAnimation') or self.idles[0],'quota')
-        self.say('让我看看 Kimi 的状态。。。。。。',0)
-        if self.quota_inflight:
-            # Repeated requests share the in-flight read; delivery uses the newest generation.
-            self.quota_generation=token;return
-        self.quota_generation=token;self.quota_inflight=True;self.worker=QuotaWorker(self)
-        self.worker.ready.connect(self.quota_ready);self.worker.failed.connect(self.quota_failed);self.worker.start()
-    def quota_ready(self,windows):
-        self.quota_inflight=False
-        if self.speech_hidden():return
-        if self.quota_generation!=self.generation:return
-        self.bubble.quota(windows);self.position_bubble();self.bubble_timer.start(12000)
-    def quota_failed(self,error):
-        self.quota_inflight=False
-        if self.quota_generation==self.generation:self.say('主人，我暂时没能确认 Kimi 的状态，过一会儿再看看好不好？\n'+error,8000)
     def mousePressEvent(self,event):
         if event.button()==Qt.MouseButton.LeftButton and self.dock_edge:
             self.consume_dock_release=True;self.pointer_down=False
             self.note_interaction(cancel_movement=False)
             self.dock_double_click=self.dock_click_timer.isActive()
             if self.dock_double_click:
-                self.dock_click_timer.stop();self.quota()
+                self.dock_click_timer.stop()
             return
         self.note_interaction()
         if event.button()==Qt.MouseButton.RightButton:
@@ -901,14 +854,15 @@ class Pet(QWidget):
             else:self.idle()
             return
         now=time.monotonic()
-        if self.last_click is not None and now-self.last_click<=.25:self.quota()
+        if self.last_click is not None and now-self.last_click<=.25:
+            # Double click: skip the wait and interact immediately.
+            self.click_timer.stop();self.single_click()
         else:self.last_click=now;self.click_timer.start()
     def closeEvent(self,event):
         if self.chat and not self.chat.shutdown():
             event.ignore();QTimer.singleShot(500,self.close);return
         self.desktop_sync.stop()
         self.tick.stop();self.visibility_timer.stop();self.tray.hide();self.bubble.close()
-        if self.worker and self.worker.isRunning():self.worker.cancel.set();self.worker.wait(3000)
         QApplication.quit();event.accept()
 
 def main():

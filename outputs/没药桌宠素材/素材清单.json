@@ -354,19 +354,6 @@
     "renderAnchor": "bottom-center",
     "playbackFile": "透明WebM/landing.webm"
   },
-  "quotaAnimation": {
-    "id": "quota",
-    "name": "查阅额度",
-    "file": "透明WebM/quota.webm",
-    "durationMs": 4000,
-    "renderScale": 1.0,
-    "renderOffset": [
-      0.0,
-      0.0
-    ],
-    "renderAnchor": "bottom-center",
-    "playbackFile": "透明WebM/quota.webm"
-  },
   "workAnimations": [
     {
       "id": "work01",

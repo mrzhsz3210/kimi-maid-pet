@@ -87,7 +87,7 @@ class MovementTests(unittest.TestCase):
 
     def setUp(self):
         p=self.pet;p.undock();p.finish_movement();p.task_active=False;p.manual_hidden=False
-        p.fullscreen_hidden=False;p.dragging=False;p.pointer_down=False;p.quota_inflight=False
+        p.fullscreen_hidden=False;p.dragging=False;p.pointer_down=False
         p.movement_ready_at=0;p.last_interaction=time.monotonic();p.click_timer.stop()
         p.next_leisure_at=time.monotonic()+15;p.next_leisure_group="idle"
         p.auto_movement_disabled=False
@@ -121,37 +121,26 @@ class MovementTests(unittest.TestCase):
         from types import SimpleNamespace
         p=self.pet;p.dock_edge='left';p.dock_started=time.monotonic()-1
         click=SimpleNamespace(button=lambda:Qt.MouseButton.LeftButton)
-        with patch.object(p,'single_click') as interact,patch.object(p,'quota') as quota,patch.object(p,'play_click_sound') as sound:
+        with patch.object(p,'single_click') as interact,patch.object(p,'play_click_sound') as sound:
             p.mousePressEvent(click);self.assertFalse(getattr(p,'dock_exit',None))
             p.mouseReleaseEvent(click);self.assertFalse(p.click_timer.isActive());self.assertIsNone(p.last_click)
             self.assertTrue(p.dock_click_timer.isActive());p.dock_click_timer.timeout.emit()
             p.grab();start=p.dock_exit[0]
             with patch('pet.time.monotonic',return_value=start+.31):p.animate()
             self.assertIsNone(p.dock_edge);self.assertIsNone(p.dock_exit)
-            interact.assert_not_called();quota.assert_not_called();sound.assert_not_called()
+            interact.assert_not_called();sound.assert_not_called()
 
-    def test_docked_double_click_queries_without_exiting(self):
+    def test_docked_double_click_stays_docked(self):
         from types import SimpleNamespace
         p=self.pet;p.dock_edge='right';p.dock_started=time.monotonic()-1
         click=SimpleNamespace(button=lambda:Qt.MouseButton.LeftButton)
-        with patch.object(p,'quota') as quota,patch.object(p,'begin_undock') as leave:
+        with patch.object(p,'begin_undock') as leave:
             p.mousePressEvent(click);p.mouseReleaseEvent(click)
             self.assertTrue(p.dock_click_timer.isActive())
             p.mouseDoubleClickEvent(click);p.mouseReleaseEvent(click)
-            quota.assert_called_once();leave.assert_not_called()
+            leave.assert_not_called()
             self.assertEqual(p.dock_edge,'right');self.assertFalse(p.dock_click_timer.isActive())
             self.assertFalse(p.click_timer.isActive())
-
-    def test_docked_quota_keeps_idle_animation(self):
-        p=self.pet;p.dock_edge='left';p.dock_started=time.monotonic()-1;current=p.current
-        old_worker=p.worker
-        try:
-            with patch('pet.QuotaWorker'),patch.object(p,'play') as play,patch.object(p,'play_click_sound'):
-                p.quota();play.assert_not_called();self.assertIs(p.current,current)
-                self.assertEqual(p.dock_edge,'left');self.assertTrue(p.bubble.isVisible())
-                p.quota_ready([{'remaining':70,'name':'5小时','resetsAt':None}])
-                self.assertEqual(p.dock_edge,'left');self.assertEqual(p.mode,'idle')
-        finally:p.worker=old_worker;p.quota_inflight=False
 
     def test_preload_and_menu(self):
         p=self.pet;item=p.movement_slots[0]
