@@ -31,6 +31,14 @@ class Tests(unittest.TestCase):
     def test_variant_return(self):
         self.pet.choose(self.pet.variants[0]);self.pet.started=time.monotonic()-4.01;self.pet.animate()
         self.assertEqual(self.pet.mode,'idle')
+    def test_rapid_clicks_trigger_knockback(self):
+        knockback=next(v for v in self.pet.variants if v['id']=='knockback')
+        with patch.object(self.pet,'choose') as choose:
+            for _ in range(3):self.pet.single_click()
+            self.assertNotIn('knockback',[c.args[0]['id'] for c in choose.call_args_list])
+            self.pet.single_click()
+            self.assertEqual(choose.call_args.args[0]['id'],'knockback')
+            self.pet.click_streak=0
     def test_menu_contains_all_variants_and_exit(self):
         actions=[]
         def inspect():

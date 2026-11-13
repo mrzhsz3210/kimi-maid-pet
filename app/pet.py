@@ -113,6 +113,7 @@ class Pet(QWidget):
         self.frame_size=min(512,max(256,round(256*max(s.devicePixelRatio() for s in QApplication.screens()))))
         self.transition=None
         self.bubble=Bubble();self.generation=0;self.dragging=False;self.last_click=None
+        self.click_streak=0;self.click_streak_at=0.0
         self.bubble.dismiss_requested.connect(self.dismiss_bubble)
         self.chat=None
         self.task_active=False
@@ -797,9 +798,17 @@ class Pet(QWidget):
         except Exception as error:self.idle();self.say('唔，主人，这个动作暂时没能准备好：'+str(error))
     def single_click(self):
         self.last_click=None
+        now=time.monotonic()
+        # Rapid poking (4+ clicks within 2s each) knocks her off balance.
+        self.click_streak=(self.click_streak+1) if now-getattr(self,'click_streak_at',0)<=2.0 else 1
+        self.click_streak_at=now
+        if self.click_streak>=4:
+            self.click_streak=0
+            knockback=next((v for v in self.variants if v['id']=='knockback'),None)
+            if knockback is not None:self.choose(knockback);return
         pool=self.interaction_animations()
         previous=self.current.get('id') if self.current else None
-        available=[v for v in pool if v['id']!=previous] or pool
+        available=[v for v in pool if v['id']!=previous and v['id']!='knockback'] or pool
         if available:self.choose(random.choice(available))
     def interaction_animations(self):
         # Single clicks pick from interaction variants only; work animations
@@ -811,7 +820,7 @@ class Pet(QWidget):
             self.note_interaction(cancel_movement=False)
             self.dock_double_click=self.dock_click_timer.isActive()
             if self.dock_double_click:
-                self.dock_click_timer.stop()
+                self.dock_click_timer.stop();self.toggle_chat()
             return
         self.note_interaction()
         if event.button()==Qt.MouseButton.RightButton:

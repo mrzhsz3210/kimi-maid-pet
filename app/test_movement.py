@@ -130,16 +130,16 @@ class MovementTests(unittest.TestCase):
             self.assertIsNone(p.dock_edge);self.assertIsNone(p.dock_exit)
             interact.assert_not_called();sound.assert_not_called()
 
-    def test_docked_double_click_stays_docked(self):
+    def test_docked_double_click_opens_chat(self):
         from types import SimpleNamespace
         p=self.pet;p.dock_edge='right';p.dock_started=time.monotonic()-1
         click=SimpleNamespace(button=lambda:Qt.MouseButton.LeftButton)
-        with patch.object(p,'begin_undock') as leave:
+        with patch.object(p,'toggle_chat') as chat,patch.object(p,'begin_undock') as leave:
             p.mousePressEvent(click);p.mouseReleaseEvent(click)
             self.assertTrue(p.dock_click_timer.isActive())
             p.mouseDoubleClickEvent(click);p.mouseReleaseEvent(click)
-            leave.assert_not_called()
-            self.assertEqual(p.dock_edge,'right');self.assertFalse(p.dock_click_timer.isActive())
+            chat.assert_called_once();leave.assert_not_called()
+            self.assertFalse(p.dock_click_timer.isActive())
             self.assertFalse(p.click_timer.isActive())
 
     def test_preload_and_menu(self):
