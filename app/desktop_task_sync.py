@@ -5,11 +5,42 @@ Kimi's own hooks append to. Event payloads contain no reasoning or command
 output, only public session metadata (title, tool names, status).
 """
 import json
+import re
 import time
 from pathlib import Path
 from PySide6.QtCore import QObject, QTimer
 
 ACTIVE_EVENTS = ('TurnStarted', 'PostToolUse', 'PermissionRequest')
+
+
+def problem_summary(detail, exit_code=None):
+    """Summarize a tool failure for the bubble, redacting anything secret-shaped."""
+    raw = str(detail or '')
+    try:
+        parsed = json.loads(raw)
+        if isinstance(parsed, dict):
+            raw = str(parsed.get('message') or parsed.get('error') or '')
+    except (ValueError, TypeError):
+        pass
+    lines = [s.strip() for s in raw.splitlines() if s.strip() and not re.search(r'authorization|api.?key|password|token|secret', s, re.I)]
+    matches = [s for s in lines if re.search(r'error|exception|failed|timeout|timed out|denied|no such|错误|失败|不存在|无法|拒绝', s, re.I)]
+    excerpt = '\n'.join(matches[-2:])[:500]
+    low = excerpt.lower()
+    if re.search(r'timeout|timed out|超时', low):
+        reason = '请求超时'
+    elif re.search(r'connect|network|failed to fetch|name_not_resolved|网络', low):
+        reason = '网络连接异常'
+    elif re.search(r'no such file|filenotfound|cannot find|不存在', low):
+        reason = '文件或路径不存在'
+    elif re.search(r'no module named|modulenotfound', low):
+        reason = '缺少需要的程序模块'
+    elif re.search(r'permission|access.*denied|权限|拒绝', low):
+        reason = '权限不足或访问被拒绝'
+    elif re.search(r'assertion|failed \(|test.*fail|检查.*未通过', low):
+        reason = '执行检查未通过'
+    else:
+        reason = '工具执行异常' + (f'（返回码 {exit_code}）' if exit_code is not None else '')
+    return '主人，这一步没有成功。\n原因：' + reason + ('\n错误摘要：' + excerpt if excerpt else '\n暂时没有更详细的错误信息。') + '\n任务是否完成会另外通知你。'
 
 
 class DesktopTaskSync(QObject):

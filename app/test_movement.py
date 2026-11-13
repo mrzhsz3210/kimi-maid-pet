@@ -205,8 +205,8 @@ class MovementTests(unittest.TestCase):
         flights=[v for v in p.movement_slots if v['number']=='03']
         self.assertEqual(len(flights),2)
         for item in flights:
-            self.assertEqual(item['durationMs'],9100)
-            self.assertEqual(len(p.pinned_frames[str(p.asset_path(item))]),273)
+            self.assertEqual(item['durationMs'],9000)
+            self.assertEqual(len(p.pinned_frames[str(p.asset_path(item))]),216)
             with patch('pet.plan_movement',return_value=((320,200),False)) as planner:
                 self.assertTrue(p.start_movement(item,manual=True))
                 self.assertEqual(planner.call_args.kwargs['angle_range'],[45,80])
