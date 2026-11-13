@@ -17,85 +17,69 @@ class FakePet(QObject):
         for name in ('task_started','task_finished','task_progress','task_completed','task_result','say'):
             setattr(self,name,Mock())
 
-def write_events(path,events):
-    with path.open('a',encoding='utf-8') as handle:
-        for event in events:handle.write(json.dumps(event,ensure_ascii=False)+'\n')
+def write_state(root, workspace, session, **fields):
+    folder=Path(root)/workspace/session
+    folder.mkdir(parents=True,exist_ok=True)
+    data={'id':session,'archived':False,'updatedAt':int(time.time()*1000),**fields}
+    (folder/'state.json').write_text(json.dumps(data,ensure_ascii=False),encoding='utf-8')
+    return data
 
-class HookSyncTests(unittest.TestCase):
+class WatcherSyncTests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
-        self.path=Path(self.tmp.name)/'sync-events.jsonl'
-        self.now=[1000.0]
+        self.now=[time.time()]
         self.pet=FakePet()
-        self.sync=DesktopTaskSync(self.pet,log_path=self.path,clock=lambda:self.now[0])
+        self.sync=DesktopTaskSync(self.pet,sessions_root=self.tmp.name,clock=lambda:self.now[0])
     def tearDown(self):
         self.tmp.cleanup()
-    def test_start_progress_stop_flow(self):
-        self.sync.start()
-        write_events(self.path,[
-            {'hook_event_name':'TurnStarted','session_id':'s1','session_title':'修问题','prompt':'帮我修问题','turn_id':'t1'},
-            {'hook_event_name':'PostToolUse','session_id':'s1','tool_name':'Bash'}])
+    def test_running_then_completed(self):
+        write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason=None,lastPrompt='帮我修问题')
         self.sync.poll()
         self.pet.task_started.assert_called_once()
-        texts=[c.args[1] for c in self.pet.task_progress.call_args_list]
-        self.assertTrue(any('帮你处理' in t for t in texts))
-        self.assertTrue(any('Bash' in t for t in texts))
-        write_events(self.path,[{'hook_event_name':'Stop','session_id':'s1'}])
+        self.assertIn('收到',self.pet.task_progress.call_args.args[0])
+        write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason='completed')
         self.sync.poll()
         self.pet.task_finished.assert_called_once()
         self.pet.task_completed.assert_called_once()
-    def test_old_events_are_skipped_on_start(self):
-        write_events(self.path,[{'hook_event_name':'TurnStarted','session_id':'old','session_title':'旧任务'}])
-        self.sync.start();self.sync.poll()
-        self.pet.task_started.assert_not_called()
+        self.assertIn('修问题',self.pet.task_completed.call_args.args[0])
     def test_failure_never_celebrates(self):
-        self.sync.start()
-        write_events(self.path,[
-            {'hook_event_name':'TurnStarted','session_id':'s1'},
-            {'hook_event_name':'StopFailure','session_id':'s1'}])
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason='error')
         self.sync.poll()
         self.pet.task_completed.assert_not_called()
         self.assertIn('还没有完成',self.pet.task_progress.call_args.args[0])
-    def test_interrupt_reports_interruption(self):
-        self.sync.start()
-        write_events(self.path,[
-            {'hook_event_name':'TurnStarted','session_id':'s1'},
-            {'hook_event_name':'Interrupt','session_id':'s1'}])
+    def test_old_sessions_are_ignored(self):
+        write_state(self.tmp.name,'w','old',title='旧任务',lastTurnReason=None,
+                    updatedAt=int((self.now[0]-3600)*1000))
         self.sync.poll()
-        self.pet.task_completed.assert_not_called()
-        self.assertIn('中断',self.pet.task_progress.call_args.args[0])
+        self.pet.task_started.assert_not_called()
+    def test_fast_turn_reports_completion_once(self):
+        write_state(self.tmp.name,'w','s1',title='秒完任务',lastTurnReason='completed')
+        self.sync.poll();self.sync.poll()
+        self.pet.task_completed.assert_called_once()
     def test_parallel_sessions_block_finish_until_all_done(self):
-        self.sync.start()
-        write_events(self.path,[
-            {'hook_event_name':'TurnStarted','session_id':'a'},
-            {'hook_event_name':'TurnStarted','session_id':'b'},
-            {'hook_event_name':'Stop','session_id':'a'}])
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason=None)
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason=None)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason='completed')
         self.sync.poll()
         self.pet.task_finished.assert_not_called()
-        self.pet.task_completed.assert_called_once()
-        write_events(self.path,[{'hook_event_name':'Stop','session_id':'b'}])
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason='completed')
         self.sync.poll()
         self.pet.task_finished.assert_called_once()
+    def test_pet_own_sessions_excluded(self):
+        own=write_state(self.tmp.name,'w','own-session',title='桌宠自己的任务',lastTurnReason=None)
+        self.sync.excluded=lambda:{'own-session'}
+        self.sync.poll()
+        self.pet.task_started.assert_not_called()
     def test_silent_task_reminder_after_five_minutes(self):
-        self.sync.start()
-        write_events(self.path,[{'hook_event_name':'TurnStarted','session_id':'s1'}])
+        data=write_state(self.tmp.name,'w','s1',title='长任务',lastTurnReason=None)
         self.sync.poll()
         self.pet.task_progress.reset_mock()
+        # 文件不再更新（mtime 不变），但任务超过 5 分钟没有动静
         self.now[0]+=299;self.sync.poll();self.pet.task_progress.assert_not_called()
         self.now[0]+=2;self.sync.poll();self.pet.task_progress.assert_called_once()
-    def test_permission_request_alerts(self):
-        self.sync.start()
-        write_events(self.path,[
-            {'hook_event_name':'TurnStarted','session_id':'s1'},
-            {'hook_event_name':'PermissionRequest','session_id':'s1','tool_name':'Bash'}])
-        self.sync.poll()
-        self.assertIn('确认权限',self.pet.task_progress.call_args.args[1])
-    def test_stop_without_start_is_ignored(self):
-        self.sync.start()
-        write_events(self.path,[{'hook_event_name':'Stop','session_id':'nobody'}])
-        self.sync.poll()
-        self.pet.task_completed.assert_not_called()
-        self.pet.task_finished.assert_not_called()
 
 class DockIntegrationTests(unittest.TestCase):
     @classmethod

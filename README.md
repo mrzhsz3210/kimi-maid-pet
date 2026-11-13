@@ -7,7 +7,7 @@
 
 - 35 段透明 WebM 动画：待机 / 互动差分 / 工作 / 移动 / 拖拽落地，单击互动（双击立即互动，连点 4 下触发"弹飞"彩蛋）、拖动、吸边探头（吸边双击打开对话）
 - **对话模式**：右键打开对话模式，直接让没药调用 Kimi Code 干活（走官方 `kimi acp` 协议，流式输出、权限确认气泡）
-- **任务同步**：你在 Kimi Code CLI / 桌面客户端里的任务进展，没药会通过气泡提醒（基于 Kimi Hooks，见下文）
+- **任务同步**：你在 Kimi Code（CLI 和桌面客户端）里的任务进展，没药都会通过气泡提醒（只读本地会话状态文件，无需任何配置）
 
 ## 运行（需要 Python 3.12+ 与 Kimi Code CLI）
 
@@ -20,16 +20,9 @@ python app/pet.py --self-test   # 离线自检
 - 需要已安装并登录 Kimi Code CLI（`kimi login`）。找不到 CLI 时可设环境变量 `MAID_KIMI` 指向 `kimi.exe`。
 - 透明动画解码依赖 `tools/ffmpeg.exe`（libvpx-vp9，保留 alpha 通道），完整发布包附带；源码运行请自行放置。
 
-## 任务进展同步（Kimi Hooks）
+## 任务进展同步（自动，无需配置）
 
-桌宠本体不会读你的会话内容；Kimi 的 hooks 只把事件元信息（会话标题、工具名、状态）追加到本地日志，桌宠每秒读取一次：
-
-```sh
-python work/install_hooks.py            # 安装 hooks 到 ~/.kimi-code/config.toml（自动备份原配置）
-python work/install_hooks.py --uninstall
-```
-
-生效事件：`TurnStarted` / `PostToolUse` / `PostToolUseFailure` / `PermissionRequest` / `Stop` / `StopFailure` / `Interrupt`。
+桌宠每 2 秒只读检查一次 `~/.kimi-code/sessions/*/*/state.json`（会话标题、状态、时间戳等元信息，不读取对话内容），Kimi Code CLI 和桌面客户端的任务开始/完成/失败都会触发气泡提醒与工作动画。桌宠自己发起的对话会被自动排除，不会重复提醒。
 
 ## 更换角色素材
 
