@@ -44,8 +44,8 @@ python app/pet.py --self-test   # 离线自检
 ## 目录结构
 
 ```
-app/            桌宠程序（pet.py 主程序、chat_backend.py Kimi ACP 后端、desktop_task_sync.py hooks 同步）
+app/            桌宠程序（pet.py 主程序、chat_backend.py Kimi ACP 后端、desktop_task_sync.py 会话状态监听）
 outputs/没药桌宠素材/   动画素材与清单
 tools/          ffmpeg（透明 WebM 解码，需自备）
-work/           hooks 安装脚本等工具
+work/           构建与测试工具
 ```
