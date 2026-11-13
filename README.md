@@ -1,14 +1,14 @@
-# 没药女仆桌宠（Kimi Code 版）
+# Kimi娘桌宠（Kimi Code 版）
 
-住在桌面上的星空女仆「没药」，与 **Kimi Code** 联动的动态桌宠。
+住在桌面上的星空女仆「Kimi娘」，与 **Kimi Code** 联动的动态桌宠。
 
-> 本项目基于 **[@jingh12312-rgb](https://github.com/jingh12312-rgb)** 的 [bailong-desktop-pet（GPT白龙娘动态桌宠）](https://github.com/jingh12312-rgb/bailong-desktop-pet) v0.5.1 改造，已获得原作者授权。桌宠框架（动画播放、吸边、气泡、移动等）的功劳属于上游作者；本项目在此基础上把后端从 Codex 换成了 Kimi Code，并换上了原创角色「没药」。如果你喜欢这个桌宠框架，请也去给上游点个 Star！
+> 本项目基于 **[@jingh12312-rgb](https://github.com/jingh12312-rgb)** 的 [bailong-desktop-pet（GPT白龙娘动态桌宠）](https://github.com/jingh12312-rgb/bailong-desktop-pet) v0.5.1 改造，已获得原作者授权。桌宠框架（动画播放、吸边、气泡、移动等）的功劳属于上游作者；本项目在此基础上把后端从 Codex 换成了 Kimi Code，并换上了「Kimi娘」角色（形象基于网络开源形象改编）。如果你喜欢这个桌宠框架，请也去给上游点个 Star！
 
 ## 功能
 
 - 36 段透明 WebM 动画：待机 / 互动差分 / 工作 / 移动 / 拖拽落地，单击互动（双击立即互动，连点 4 下触发"弹飞"彩蛋）、拖动、吸边探头（吸边双击打开对话）
-- **对话模式**：右键打开对话模式，直接让没药调用 Kimi Code 干活（走官方 `kimi acp` 协议，流式输出、权限确认气泡）
-- **任务同步**：你在 Kimi Code（CLI 和桌面客户端）里的任务进展，没药都会通过气泡提醒（只读本地会话状态文件，无需任何配置）
+- **对话模式**：右键打开对话模式，直接让Kimi娘调用 Kimi Code 干活（走官方 `kimi acp` 协议，流式输出、权限确认气泡）
+- **任务同步**：你在 Kimi Code（CLI 和桌面客户端）里的任务进展，Kimi娘都会通过气泡提醒（只读本地会话状态文件，无需任何配置）
 
 ## 运行（需要 Python 3.12+ 与 Kimi Code CLI）
 
@@ -27,7 +27,7 @@ python app/pet.py --self-test   # 离线自检
 
 ## 更换角色素材
 
-素材全部外置在 `outputs/没药桌宠素材/`：
+素材全部外置在 `outputs/Kimi娘桌宠素材/`：
 
 - `透明WebM/*.webm` —— 720×720、24fps、VP9 + alpha（yuva420p），角色脚底贴画面底部中央
 - `素材清单.json` —— 每段动画的时长、缩放、偏移、台词、移动参数
@@ -37,7 +37,7 @@ python app/pet.py --self-test   # 离线自检
 ## 版权与许可说明
 
 - 本仓库程序部分衍生自 [@jingh12312-rgb](https://github.com/jingh12312-rgb) 的 [bailong-desktop-pet](https://github.com/jingh12312-rgb/bailong-desktop-pet)，**已获得原作者授权发布**。上游的「白龙娘」美术素材不包含在本仓库中，其许可见上游 ASSETS.md。
-- 「没药」角色素材（`outputs/没药桌宠素材/`）为本项目原创。
+- 「Kimi娘」角色素材（`outputs/Kimi娘桌宠素材/`）由项目作者制作；**形象基于网络开源形象改编**，并非完全原创人设，原型权利归其原作者/原许可所有。
 - 运行库与 ffmpeg 遵循各自许可证。
 - 本项目非 Kimi（Moonshot AI）官方产品。
 
@@ -45,7 +45,7 @@ python app/pet.py --self-test   # 离线自检
 
 ```
 app/            桌宠程序（pet.py 主程序、chat_backend.py Kimi ACP 后端、desktop_task_sync.py 会话状态监听）
-outputs/没药桌宠素材/   动画素材与清单
+outputs/Kimi娘桌宠素材/   动画素材与清单
 tools/          ffmpeg（透明 WebM 解码，需自备）
 work/           构建与测试工具
 ```

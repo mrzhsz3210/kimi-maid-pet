@@ -7,7 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'app'))
 from version import VERSION
 OUT=ROOT/'发布包'
-webm=json.loads((ROOT/'outputs/没药桌宠素材/素材清单.json').read_text(encoding='utf-8'))['idle'].get('playbackFile','').endswith('.webm')
+webm=json.loads((ROOT/'outputs/Kimi娘桌宠素材/素材清单.json').read_text(encoding='utf-8'))['idle'].get('playbackFile','').endswith('.webm')
 edition='-webm' if webm else ''
 stage=OUT/f'release-v{VERSION}{edition}'
 source=stage/'repository/kimi-maid-pet';portable=stage/'windows/KimiMaidPet'
@@ -18,7 +18,7 @@ for name in modules:shutil.copy2(ROOT/'app'/name,source/'app'/name)
 shutil.copytree(ROOT/'app/sounds',source/'app/sounds',dirs_exist_ok=True)
 guide=(ROOT/'work/release_readme.txt').read_text(encoding='utf-8')
 if webm:guide=guide.replace('windows-x64.zip','windows-x64-webm.zip')+'\n透明WebM轻量版：动画保留原分辨率与帧率；tools文件夹包含必需的透明视频解码器，请一起保留。\n'
-readme='# 没药女仆桌宠（Kimi Code 版） '+VERSION+'\n\n普通使用者请下载Releases里的 **kimi-maid-pet-v'+VERSION+'-windows-x64.zip**。解压后双击KimiMaidPet.exe；无需Python。\n\n'+guide
+readme='# Kimi娘桌宠（Kimi Code 版） '+VERSION+'\n\n普通使用者请下载Releases里的 **kimi-maid-pet-v'+VERSION+'-windows-x64.zip**。解压后双击KimiMaidPet.exe；无需Python。\n\n'+guide
 (source/'README.md').write_text(readme,encoding='utf-8')
 (source/'先看我-安装说明.txt').write_text(guide,encoding='utf-8-sig')
 (source/'requirements.txt').write_text('PySide6==6.9.2\nPillow==12.0.0\npsutil==7.0.0\n',encoding='utf-8')
@@ -41,8 +41,8 @@ python -m venv .venv
 所有播放路径相对发行目录。renderScale和renderOffset控制固定显示校准。
 衍生自 bailong-desktop-pet（已获原作者授权），美术许可见ASSETS.md。
 ''',encoding='utf-8')
-(source/'ASSETS.md').write_text('素材随Releases发布。36段透明WebM动画为原创角色「没药」（星空女仆）素材，由项目作者制作。点击音效为Kenney素材（许可见licenses）。\n',encoding='utf-8')
-(source/'RELEASE_NOTES.md').write_text(f'''没药女仆桌宠（Kimi Code 版） v{VERSION}
+(source/'ASSETS.md').write_text('素材随Releases发布。36段透明WebM动画由项目作者制作；「Kimi娘」形象基于网络开源形象改编，并非完全原创人设，原型权利归其原作者/原许可所有。点击音效为程序合成。\n',encoding='utf-8')
+(source/'RELEASE_NOTES.md').write_text(f'''Kimi娘桌宠（Kimi Code 版） v{VERSION}
 
 普通用户下载windows-x64-webm.zip，全部解压后双击KimiMaidPet.exe。
 已包含Python、Qt、图像和进程处理依赖、36段动画、点击音效及中文入门说明。
@@ -61,7 +61,7 @@ if webm:
     shutil.copy2(ROOT/'work/video-deps/imageio_ffmpeg/binaries/ffmpeg-win-x86_64-v7.1.exe',portable/'tools/ffmpeg.exe')
 (portable/'app').mkdir(exist_ok=True)
 shutil.copytree(ROOT/'app/sounds',portable/'app/sounds',dirs_exist_ok=True)
-assets=ROOT/'outputs/没药桌宠素材';dest=portable/'outputs/没药桌宠素材';dest.mkdir(parents=True,exist_ok=True)
+assets=ROOT/'outputs/Kimi娘桌宠素材';dest=portable/'outputs/Kimi娘桌宠素材';dest.mkdir(parents=True,exist_ok=True)
 m=json.loads((assets/'素材清单.json').read_text(encoding='utf-8'))
 lean={k:m[k] for k in ('version','character','idle','additionalIdleAnimations','variants','dragAnimation','landingAnimation')}
 lean['workAnimations']=m.get('workAnimations',[])[:6]
@@ -77,7 +77,7 @@ for item in items:
         bridge_dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(assets/bridge,bridge_dest)
 (dest/'素材清单.json').write_text(json.dumps(lean,ensure_ascii=False,indent=2),encoding='utf-8')
 for name in ['README.md','ASSETS.md','RELEASE_NOTES.md','先看我-安装说明.txt']:shutil.copy2(source/name,portable/name)
-page='<!doctype html><meta charset="utf-8"><title>没药桌宠安装说明</title><style>body{max-width:850px;margin:40px auto;padding:0 24px;font:17px/1.8 "Microsoft YaHei",sans-serif;color:#453950;background:#fbf8fe}pre{white-space:pre-wrap;font:inherit}</style><pre>'+html.escape(guide)+'</pre>'
+page='<!doctype html><meta charset="utf-8"><title>Kimi娘桌宠安装说明</title><style>body{max-width:850px;margin:40px auto;padding:0 24px;font:17px/1.8 "Microsoft YaHei",sans-serif;color:#453950;background:#fbf8fe}pre{white-space:pre-wrap;font:inherit}</style><pre>'+html.escape(guide)+'</pre>'
 (portable/'先看我-安装说明.html').write_text(page,encoding='utf-8')
 for name,flag in [('开启随Kimi自动启动.cmd','--enable-autostart'),('关闭随Kimi自动启动.cmd','--disable-autostart')]:
     (portable/name).write_text('@echo off\ncd /d "%~dp0"\nstart "" "%~dp0KimiMaidPet.exe" '+flag+'\n',encoding='ascii')

@@ -30,7 +30,7 @@ class Composer(QWidget):
 
     def __init__(self):
         super().__init__(None, FLAGS)
-        self.setWindowTitle('没药 · 对话模式')
+        self.setWindowTitle('Kimi娘 · 对话模式')
         self.setStyleSheet(STYLE)
         self.setFixedSize(280, 152)
         self.setStyleSheet(STYLE+'QPushButton {padding:4px 5px;font-size:11px;} QComboBox {padding:2px;font-size:11px;}')
@@ -83,7 +83,7 @@ class ChatWindow(QWidget):
 
     def __init__(self):
         super().__init__(None, Qt.WindowType.Window)
-        self.setWindowTitle('没药女仆桌宠 · 历史对话')
+        self.setWindowTitle('Kimi娘桌宠 · 历史对话')
         self.resize(940, 680)
         self.setMinimumSize(580, 440)
         self.setStyleSheet(STYLE)
@@ -367,7 +367,7 @@ class ChatController(QObject):
             result=turn.get('result','')
             if turn['status']=='completed' and result and output.endswith(result):
                 output=output[:-len(result)].rstrip()
-            if output:content.append(block('没药 · 给主人的进展',output))
+            if output:content.append(block('Kimi娘 · 给主人的进展',output))
             if turn['status']=='completed':
                 content.append(block('主人，完成啦！',turn.get('result','')))
             elif turn['status']=='running':content.append(block('主人，我正在努力处理呢…','进展都会写在这里哦。如果主人想让我先停一停，点击“停止任务”就好。'))

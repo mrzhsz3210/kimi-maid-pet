@@ -1,4 +1,4 @@
-没药女仆桌宠（Kimi Code 版） v0.1.0 — Windows新手说明
+Kimi娘桌宠（Kimi Code 版） v0.1.0 — Windows新手说明
 
 适用Windows 10/11，Intel/AMD 64位电脑。本包为电脑版，无手机版或Mac安装包。
 下载 kimi-maid-pet-v0.1.0-windows-x64-webm.zip，右键“全部提取”。打开KimiMaidPet文件夹，双击KimiMaidPet.exe。无需安装Python。

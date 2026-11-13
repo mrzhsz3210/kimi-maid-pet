@@ -1,4 +1,4 @@
-# 没药女仆桌宠（Kimi Code 版）开发说明
+# Kimi娘桌宠（Kimi Code 版）开发说明
 
 衍生自 bailong-desktop-pet v0.5.1，后端从 Codex 替换为 Kimi Code（`kimi acp`，ACP 协议），任务同步改为 Kimi Hooks。
 
@@ -6,7 +6,7 @@
 
 1. 安装 64 位 Python（3.12+，上游构建使用 3.13）。
 2. 在源码目录执行 `python -m pip install -r requirements.txt`。
-3. 确认 `outputs/没药桌宠素材/`（随仓库）与 `tools/ffmpeg.exe`（不随仓库，自行放置）就位。
+3. 确认 `outputs/Kimi娘桌宠素材/`（随仓库）与 `tools/ffmpeg.exe`（不随仓库，自行放置）就位。
 4. 安装并登录 Kimi Code CLI（`kimi login`）。
 5. 执行 `python app/pet.py`；自检执行 `python app/pet.py --self-test`。任务进展同步开箱即用（CLI 与桌面端通吃）。
 
@@ -36,4 +36,4 @@ python work/test_e2e_backend.py                  # 真实 Kimi 连通测试（�
 
 ## 许可说明
 
-本项目衍生自 [@jingh12312-rgb](https://github.com/jingh12312-rgb) 的 bailong-desktop-pet，已获原作者授权发布。「没药」素材为本项目原创，见 ASSETS.md。本项目非 Kimi（Moonshot AI）官方产品。
+本项目衍生自 [@jingh12312-rgb](https://github.com/jingh12312-rgb) 的 bailong-desktop-pet，已获原作者授权发布。「Kimi娘」形象基于网络开源形象改编，素材说明见 ASSETS.md。本项目非 Kimi（Moonshot AI）官方产品。

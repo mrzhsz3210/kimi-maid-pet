@@ -13,7 +13,7 @@ def run(root):
             from chat_backend import KimiSession
             folder=root/'对话自检任务';folder.mkdir(exist_ok=True)
             session=KimiSession(folder)
-            try:result=session.run('这是桌宠对话连接验收。不要使用工具，不要读写文件，只回复：没药对话连接成功。')
+            try:result=session.run('这是桌宠对话连接验收。不要使用工具，不要读写文件，只回复：Kimi娘对话连接成功。')
             finally:session.close()
             assert '连接成功' in result['text'],result['text']
             report['checks'].append('EXE通过Kimi后台任务收到真实回复；不记录账号或任务ID')

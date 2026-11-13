@@ -3,7 +3,7 @@ from pathlib import Path
 import gzip,json
 from PIL import Image
 
-root=Path(__file__).resolve().parents[1];assets=root/'outputs/没药桌宠素材'
+root=Path(__file__).resolve().parents[1];assets=root/'outputs/Kimi娘桌宠素材'
 manifest=json.loads((assets/'素材清单.json').read_text(encoding='utf-8'))
 items=[manifest['idle']]+manifest.get('additionalIdleAnimations',[])+manifest['variants']
 items += [v for v in manifest.get('workAnimations',[]) if v]

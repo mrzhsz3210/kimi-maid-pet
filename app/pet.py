@@ -12,7 +12,7 @@ from movement import plan_movement, movement_fraction
 from platform_support import resource_root,state_root,configure_mac_window
 ROOT=resource_root()
 STATE_ROOT=state_root()
-ASSETS=ROOT/'outputs/没药桌宠素材'
+ASSETS=ROOT/'outputs/Kimi娘桌宠素材'
 FLAGS=Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.Tool
 
 def clamp_position(position,size,area):
@@ -103,7 +103,7 @@ class Pet(QWidget):
         super().__init__(None,FLAGS)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
-        self.setWindowTitle('没药桌宠');self.setFixedSize(256,256)
+        self.setWindowTitle('Kimi娘桌宠');self.setFixedSize(256,256)
         self.manifest=json.loads((ASSETS/'素材清单.json').read_text(encoding='utf-8'))
         self.variants=[v for v in self.manifest['variants'] if self.asset_path(v).is_file()]
         self.idles=[self.manifest['idle']]+self.manifest.get('additionalIdleAnimations',[])[:1]
@@ -152,7 +152,7 @@ class Pet(QWidget):
         progress=None
         if QApplication.platformName()!='offscreen':
             progress=QProgressDialog('主人，等我整理好裙摆和女仆头饰，马上就来…','',0,len(items))
-            progress.setCancelButton(None);progress.setWindowTitle('没药桌宠');progress.setMinimumDuration(0);progress.show()
+            progress.setCancelButton(None);progress.setWindowTitle('Kimi娘桌宠');progress.setMinimumDuration(0);progress.show()
         for i,item in enumerate(items):
             key=str(self.asset_path(item));self.pinned_frames[key]=self.load(item);self.cache.pop(key,None)
             if progress:progress.setValue(i+1);QApplication.processEvents()
@@ -176,7 +176,7 @@ class Pet(QWidget):
         # Use the default idle's first frame, independent of the current action.
         icon=QIcon(self.pinned_frames[str(self.asset_path(self.idles[0]))][0])
         self.setWindowIcon(icon)
-        self.tray=QSystemTrayIcon(icon,self);self.tray.setToolTip('没药女仆桌宠')
+        self.tray=QSystemTrayIcon(icon,self);self.tray.setToolTip('Kimi娘桌宠')
         self.tray_menu=self.context_menu();self.tray.setContextMenu(self.tray_menu)
         self.tray_menu.aboutToShow.connect(self.refresh_tray_menu)
         self.tray.activated.connect(self.tray_activated)
@@ -304,7 +304,7 @@ class Pet(QWidget):
             self.sync_dialogue_visibility()
         if hasattr(self,'tray'):
             state='已隐藏' if self.manual_hidden else ('全屏时自动隐藏' if self.fullscreen_hidden else '正在陪伴主人')
-            self.tray.setToolTip('没药女仆桌宠 · '+state)
+            self.tray.setToolTip('Kimi娘桌宠 · '+state)
     def check_fullscreen(self):
         if self.tray_menu.isVisible():return
         state=self.auto_hide_fullscreen and self.fullscreen_detector.active();now=time.monotonic()
@@ -895,7 +895,7 @@ def main():
             if '--enable-autostart' in sys.argv:
                 enable_autostart();message='已开启：以后登录系统时，桌宠会自动运行。\n如要移动桌宠文件夹，请先关闭自动启动，移好后再开启。'
             else:disable_autostart();message='已关闭桌宠自动启动。'
-            QMessageBox.information(None,'没药桌宠',message);return 0
+            QMessageBox.information(None,'Kimi娘桌宠',message);return 0
         except Exception as error:QMessageBox.critical(None,'设置失败',str(error));return 1
     socket=QLocalSocket();socket.connectToServer('kimi-maid-pet-v1')
     if socket.waitForConnected(150):return 0
@@ -935,7 +935,7 @@ def main():
         if '--preview' in sys.argv:
             QTimer.singleShot(500,lambda:pet.grab().save(str(STATE_ROOT/'app/桌宠窗口预览.png')))
             QTimer.singleShot(900,app.quit)
-    except Exception as error:QMessageBox.critical(None,'没药桌宠启动失败',str(error));return 1
+    except Exception as error:QMessageBox.critical(None,'Kimi娘桌宠启动失败',str(error));return 1
     return app.exec()
 
 if __name__=='__main__':sys.exit(main())

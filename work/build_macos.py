@@ -6,7 +6,7 @@ if sys.platform!='darwin':raise SystemExit('必须在Mac上运行；本脚本不
 import PyInstaller.__main__
 PyInstaller.__main__.run(['--noconfirm','--clean','--windowed','--name','KimiMaidPet','--osx-bundle-identifier','com.kimimaidpet.desktop','--distpath',str(root/'dist-macos'),'--workpath',str(root/'.build-macos'),'--specpath',str(root/'.build-macos'),'--hidden-import','autostart','--hidden-import','mac_autostart','--hidden-import','selftest','--hidden-import','AppKit','--hidden-import','Quartz','--hidden-import','PySide6.QtMultimedia',str(root/'app/pet.py')])
 resources=root/'dist-macos/KimiMaidPet.app/Contents/Resources'
-assets=root/'outputs/没药桌宠素材';dest=resources/'outputs/没药桌宠素材';dest.mkdir(parents=True,exist_ok=True)
+assets=root/'outputs/Kimi娘桌宠素材';dest=resources/'outputs/Kimi娘桌宠素材';dest.mkdir(parents=True,exist_ok=True)
 m=json.loads((assets/'素材清单.json').read_text(encoding='utf-8'))
 items=[m['idle']]+m.get('additionalIdleAnimations',[])+m['variants']+[v for v in m.get('workAnimations',[]) if v]+m.get('movementAnimations',[])+[m[k] for k in ('dragAnimation','landingAnimation','quotaAnimation') if m.get(k)]
 for v in items:

@@ -14,11 +14,11 @@ from datetime import datetime
 from quota import find_kimi
 from version import VERSION
 
-PERSONA = ('你是「没药」，一位住在用户桌面上的星空女仆：温柔、聪明、认真负责，'
+PERSONA = ('你是「Kimi娘」，一位住在用户桌面上的星空女仆：温柔、聪明、认真负责，'
            '说话时自然、轻柔、可爱，适度称呼用户为“主人”，偶尔有一点小得意或小傲娇。'
            '不要每句话都重复称呼，不滥用撒娇、拟声词、表情或夸张承诺。'
            '执行任务时保持严谨，先解决问题，保留代码、文件名、数据和技术解释的准确性。'
-           '进度、困难和待确认的问题也用没药的口吻说清楚，不编造过程，不把失败或中断说成完成。'
+           '进度、困难和待确认的问题也用Kimi娘的口吻说清楚，不编造过程，不把失败或中断说成完成。'
            '最终结果直接给出正文，客户端会单独显示“主人，完成啦！”，不必重复这句开场。'
            '角色口吻不改变用户的任务范围、访问权限或审批要求。')
 
@@ -233,7 +233,7 @@ class KimiSession:
             if not self.initialized:
                 self.rpc('initialize', {'protocolVersion': 1,
                     'clientCapabilities': {'fs': {'readTextFile': False, 'writeTextFile': False}, 'terminal': False},
-                    'clientInfo': {'name': 'kimi_maid_pet', 'title': '没药女仆桌宠', 'version': VERSION}})
+                    'clientInfo': {'name': 'kimi_maid_pet', 'title': 'Kimi娘桌宠', 'version': VERSION}})
                 self.open_thread()
                 self.initialized = True
                 self.emit('thread', self.thread_id)

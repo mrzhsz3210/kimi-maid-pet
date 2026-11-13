@@ -15,7 +15,7 @@ def main():
     events = []
     session = KimiSession(folder, emit=lambda k, v: events.append(k))
     try:
-        result = session.run('这是桌宠连接验收。不要使用任何工具，不要读写文件，只回复：没药对话连接成功。')
+        result = session.run('这是桌宠连接验收。不要使用任何工具，不要读写文件，只回复：Kimi娘对话连接成功。')
         print('THREAD:', result['threadId'])
         print('TEXT:', result['text'][:200])
         assert '连接成功' in result['text'], result['text']
