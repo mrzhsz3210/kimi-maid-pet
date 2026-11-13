@@ -830,7 +830,9 @@ class Pet(QWidget):
         available=[v for v in pool if v['id']!=previous] or pool
         if available:self.choose(random.choice(available))
     def interaction_animations(self):
-        return self.variants+[v for v in self.work_slots if v and self.asset_path(v).is_file()]
+        # Single clicks pick from interaction variants only; work animations
+        # belong to real tasks (and stay previewable via the context menu).
+        return self.variants
     def quota(self):
         self.note_interaction()
         self.click_timer.stop();self.last_click=None;self.generation+=1;token=self.generation

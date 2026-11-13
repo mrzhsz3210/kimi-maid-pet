@@ -75,13 +75,13 @@ def run(root):
             assert any(b.text()=='详情' for b in pet.bubble.findChildren(__import__('PySide6.QtWidgets',fromlist=['QPushButton']).QPushButton))
             assert chat.composer.size()==QSize(280,152)
             assert pet.mode=='task-celebration' and pet.current['id']=='18'
-            assert len(pet.interaction_animations())==21
+            assert len(pet.interaction_animations())==16
             chat.toggle() if not chat.enabled else None
             pet.play(pet.work_slots[1],'working');assert chat.composer.isVisible()
             pet.say('自动工作不显示台词');assert not pet.bubble.isVisible()
             pet.task_progress('主人，我正在理清思路…','公开进度摘要',lambda:None)
             assert pet.bubble.isVisible() and pet.bubble.is_task_progress
-            report['checks'].append('成功庆祝一次、可滚动结果和详情、21项手动互动、工作时保留输入框与公开进度气泡正常')
+            report['checks'].append('成功庆祝一次、可滚动结果和详情、16项手动互动、工作时保留输入框与公开进度气泡正常')
             chat.shutdown();pet.chat=None
         report['checks'].append('对话开关、下方输入框、三类动画菜单、历史保存与长结果详情正常（离线检查）')
         menu=pet.context_menu();actions={a.text():a for a in menu.actions()}

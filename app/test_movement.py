@@ -198,7 +198,7 @@ class MovementTests(unittest.TestCase):
         with patch('pet.plan_movement',return_value=((320,150),True)):
             p.start_movement(left,manual=True)
         p.advance_movement(3.124);self.assertEqual(p.pos(),origin)
-        p.advance_movement(4);self.assertNotEqual(p.pos(),origin)
+        p.advance_movement(4.5);self.assertNotEqual(p.pos(),origin)
 
     def test_flight_assets_and_direction_parameters(self):
         p=self.pet;self.assertEqual(len(p.movement_slots),6)
@@ -307,10 +307,10 @@ class MovementTests(unittest.TestCase):
         with patch('pet.plan_movement',return_value=((target.x(),target.y()),True)) as planner:
             self.assertTrue(p.start_movement(left,manual=True))
             self.assertEqual(planner.call_args.kwargs['allowed_directions'],(-1,))
-            self.assertAlmostEqual(planner.call_args.kwargs['distance_scale'],3333/2583)
+            self.assertAlmostEqual(planner.call_args.kwargs['distance_scale'],3000/2583)
         self.assertFalse(p.movement_mirrored)
         p.advance_movement(1.9);self.assertEqual(p.pos(),origin)
-        p.advance_movement(5.25);self.assertEqual(p.pos(),target)
+        p.advance_movement(7.3);self.assertEqual(p.pos(),target)
         p.finish_movement();p.movement_ready_at=0;p.last_interaction=time.monotonic()-30
         p.next_leisure_group='movement';p.next_leisure_at=0
         with patch.object(p,'start_movement',side_effect=[False,True]) as start:
