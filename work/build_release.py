@@ -39,20 +39,17 @@ python -m venv .venv
 复刻EXE可安装PyInstaller 6.22.3，使用onedir/windowed模式，以app/pet.py作为入口，显式包含autostart、selftest、version模块。Windows包必须在Windows构建。
 程序支持--autostart、--enable-autostart、--disable-autostart、--self-test。
 所有播放路径相对发行目录。renderScale和renderOffset控制固定显示校准。
-源码未指定开源许可证，美术许可见ASSETS.md。
+衍生自 bailong-desktop-pet（已获原作者授权），美术许可见ASSETS.md。
 ''',encoding='utf-8')
-(source/'ASSETS.md').write_text('素材随Releases发布，不纳入Git历史。35段动画来自项目作者提供的角色素材及透明处理版本。未额外授予美术素材商用或再分发许可。\n',encoding='utf-8')
-(source/'RELEASE_NOTES.md').write_text(f'''白龙桌宠 v{VERSION}
+(source/'ASSETS.md').write_text('素材随Releases发布。36段透明WebM动画为原创角色「没药」（星空女仆）素材，由项目作者制作。点击音效为Kenney素材（许可见licenses）。\n',encoding='utf-8')
+(source/'RELEASE_NOTES.md').write_text(f'''没药女仆桌宠（Kimi Code 版） v{VERSION}
 
-普通用户下载windows-x64.zip，全部解压后双击KimiMaidPet.exe。
-已包含Python、Qt、图像和进程处理依赖、35段动画、点击音效及中文入门说明。
-新增系统托盘、隐藏/显示桌宠、可开关的全屏自动隐藏，保留查询、拖拽、落地和屏幕边界限制。
-任务输入框、开启新对话、本机历史、公开思考摘要/执行进度实时显示、可滚动完整结果与详情。
-任务成功时播放一次点击音效和庆祝动画。工作01仅任务开场一次并显示收到提示；其余工作与待机按35:65分组选播，组内等概率并避免连续重复。
-15项互动与5项工作均可单击互动，手动工作动作显示台词，自动工作无动作台词。所有动作启动预加载。
-基础两套待机平时4:1播放；新增待机03—06与六个移动动作按15秒规则交替，工作动作5项已接入，剩余1槽。
-对话功能需要使用者自己的Codex安装、登录与网络；对话历史不随包分发。
-额度查询需要使用者自己安装Codex并登录；离线动作无需账号。
+普通用户下载windows-x64-webm.zip，全部解压后双击KimiMaidPet.exe。
+已包含Python、Qt、图像和进程处理依赖、36段动画、点击音效及中文入门说明。
+后端接入 Kimi Code（kimi acp）：桌宠对话模式可直接派发任务，流式输出、权限确认气泡。
+任务同步：只读监听本机 Kimi Code 会话状态文件，CLI 与桌面客户端的任务开始/完成/失败均有气泡提醒。
+工作状态只播工作差分；任务失败播放报错动画（work06）；连点4下触发弹飞彩蛋；吸边双击打开对话模式。
+对话功能需要使用者自己的 Kimi Code CLI 安装、登录与网络；对话历史不随包分发。
 此发布包仅Windows x64。macOS适配代码待实机验收，不含Mac安装包。Linux/32位Windows不支持；Windows ARM未验证。
 ''',encoding='utf-8')
 
@@ -66,10 +63,10 @@ if webm:
 shutil.copytree(ROOT/'app/sounds',portable/'app/sounds',dirs_exist_ok=True)
 assets=ROOT/'outputs/没药桌宠素材';dest=portable/'outputs/没药桌宠素材';dest.mkdir(parents=True,exist_ok=True)
 m=json.loads((assets/'素材清单.json').read_text(encoding='utf-8'))
-lean={k:m[k] for k in ('version','character','idle','additionalIdleAnimations','variants','dragAnimation','landingAnimation','quotaAnimation')}
+lean={k:m[k] for k in ('version','character','idle','additionalIdleAnimations','variants','dragAnimation','landingAnimation')}
 lean['workAnimations']=m.get('workAnimations',[])[:6]
 lean['movementAnimations']=m.get('movementAnimations',[])
-items=[lean['idle']]+lean['additionalIdleAnimations']+lean['variants']+[lean[k] for k in ('dragAnimation','landingAnimation','quotaAnimation')]+[v for v in lean['workAnimations'] if v]+lean['movementAnimations']
+items=[lean['idle']]+lean['additionalIdleAnimations']+lean['variants']+[lean[k] for k in ('dragAnimation','landingAnimation')]+[v for v in lean['workAnimations'] if v]+lean['movementAnimations']
 for item in items:
     relative=item.get('playbackFile') or item['file'].replace('.webm','.webp')
     target=dest/relative;target.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(assets/relative,target)
@@ -80,9 +77,9 @@ for item in items:
         bridge_dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(assets/bridge,bridge_dest)
 (dest/'素材清单.json').write_text(json.dumps(lean,ensure_ascii=False,indent=2),encoding='utf-8')
 for name in ['README.md','ASSETS.md','RELEASE_NOTES.md','先看我-安装说明.txt']:shutil.copy2(source/name,portable/name)
-page='<!doctype html><meta charset="utf-8"><title>白龙桌宠安装说明</title><style>body{max-width:850px;margin:40px auto;padding:0 24px;font:17px/1.8 "Microsoft YaHei",sans-serif;color:#453950;background:#fbf8fe}pre{white-space:pre-wrap;font:inherit}</style><pre>'+html.escape(guide)+'</pre>'
+page='<!doctype html><meta charset="utf-8"><title>没药桌宠安装说明</title><style>body{max-width:850px;margin:40px auto;padding:0 24px;font:17px/1.8 "Microsoft YaHei",sans-serif;color:#453950;background:#fbf8fe}pre{white-space:pre-wrap;font:inherit}</style><pre>'+html.escape(guide)+'</pre>'
 (portable/'先看我-安装说明.html').write_text(page,encoding='utf-8')
-for name,flag in [('开启随GPT自动启动.cmd','--enable-autostart'),('关闭随GPT自动启动.cmd','--disable-autostart')]:
+for name,flag in [('开启随Kimi自动启动.cmd','--enable-autostart'),('关闭随Kimi自动启动.cmd','--disable-autostart')]:
     (portable/name).write_text('@echo off\ncd /d "%~dp0"\nstart "" "%~dp0KimiMaidPet.exe" '+flag+'\n',encoding='ascii')
 (portable/'检查桌宠.cmd').write_text('@echo off\ncd /d "%~dp0"\nstart "" /wait "%~dp0KimiMaidPet.exe" --self-test\necho See the generated report: 检查报告.json\npause\n'.replace('检查报告.json','report JSON in this folder'),encoding='ascii')
 
