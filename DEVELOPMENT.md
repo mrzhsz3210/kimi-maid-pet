@@ -36,4 +36,4 @@ python work/test_e2e_backend.py                  # 真实 Kimi 连通测试（�
 
 ## 许可说明
 
-上游 bailong-desktop-pet 未指定开源许可证；在获得原作者许可前请勿公开再分发本仓库代码。「没药」素材为本项目原创，见 ASSETS.md。本项目非 Kimi（Moonshot AI）官方产品。
+本项目衍生自 [@jingh12312-rgb](https://github.com/jingh12312-rgb) 的 bailong-desktop-pet，已获原作者授权发布。「没药」素材为本项目原创，见 ASSETS.md。本项目非 Kimi（Moonshot AI）官方产品。

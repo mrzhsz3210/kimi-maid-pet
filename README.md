@@ -1,7 +1,8 @@
 # 没药女仆桌宠（Kimi Code 版）
 
 住在桌面上的星空女仆「没药」，与 **Kimi Code** 联动的动态桌宠。
-基于 [bailong-desktop-pet](https://github.com/jingh12312-rgb/bailong-desktop-pet)（GPT白龙娘动态桌宠 v0.5.1）改造：后端从 Codex 换成了 Kimi Code，角色素材换成了原创角色「没药」。
+
+> 本项目基于 **[@jingh12312-rgb](https://github.com/jingh12312-rgb)** 的 [bailong-desktop-pet（GPT白龙娘动态桌宠）](https://github.com/jingh12312-rgb/bailong-desktop-pet) v0.5.1 改造，已获得原作者授权。桌宠框架（动画播放、吸边、气泡、移动等）的功劳属于上游作者；本项目在此基础上把后端从 Codex 换成了 Kimi Code，并换上了原创角色「没药」。如果你喜欢这个桌宠框架，请也去给上游点个 Star！
 
 ## 功能
 
@@ -33,9 +34,9 @@ python app/pet.py --self-test   # 离线自检
 
 想换角色：替换 webm 并改清单即可，不用改代码。新增互动差分就往 `variants` 数组里加一条（参考 `knockback` 段）。
 
-## 版权与许可说明（重要）
+## 版权与许可说明
 
-- 本仓库程序部分衍生自 bailong-desktop-pet。**原项目未指定开源许可证**，公开源码不等于授权再分发；在获得原作者明确许可前，请勿公开再分发本仓库的代码。美术素材（白龙娘）许可见原项目 ASSETS.md。
+- 本仓库程序部分衍生自 [@jingh12312-rgb](https://github.com/jingh12312-rgb) 的 [bailong-desktop-pet](https://github.com/jingh12312-rgb/bailong-desktop-pet)，**已获得原作者授权发布**。上游的「白龙娘」美术素材不包含在本仓库中，其许可见上游 ASSETS.md。
 - 「没药」角色素材（`outputs/没药桌宠素材/`）为本项目原创。
 - 运行库与 ffmpeg 遵循各自许可证。
 - 本项目非 Kimi（Moonshot AI）官方产品。
