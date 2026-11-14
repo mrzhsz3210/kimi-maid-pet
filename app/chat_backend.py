@@ -32,6 +32,43 @@ def data_directory():
     return user_data()
 
 
+def kimi_home():
+    """Isolated KIMI_CODE_HOME for pet sessions.
+
+    Sessions created via `kimi acp` land in <home>/sessions and the desktop
+    client lists every workspace it finds under ~/.kimi-code/sessions — and
+    then freezes when opening a session written by another client. Keeping
+    the pet's sessions in a dedicated home hides them from the desktop list.
+    Config and credentials are seeded from the real home on first use.
+    """
+    home = data_directory() / 'kimi-home'
+    real = Path(os.environ.get('KIMI_CODE_HOME') or Path.home() / '.kimi-code')
+    if not home.is_dir():
+        home.mkdir(parents=True, exist_ok=True)
+    for name in ('config.toml', 'tui.toml', 'mcp.json', 'device_id'):
+        source = real / name
+        target = home / name
+        if source.is_file() and not target.exists():
+            try:
+                target.write_bytes(source.read_bytes())
+            except OSError:
+                pass
+    credentials = home / 'credentials'
+    if (real / 'credentials').is_dir() and not credentials.exists():
+        try:
+            # Directory junction needs no admin rights on Windows.
+            import subprocess
+            subprocess.run(['cmd', '/c', 'mklink', '/J', str(credentials), str(real / 'credentials')],
+                           check=True, capture_output=True, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+        except Exception:
+            import shutil
+            try:
+                shutil.copytree(real / 'credentials', credentials)
+            except OSError:
+                pass
+    return home
+
+
 class HistoryStore:
     def __init__(self, directory=None):
         self.directory = Path(directory) if directory else data_directory()
@@ -97,10 +134,13 @@ class KimiSession:
         frozen_windows = sys.platform == 'win32' and getattr(sys, 'frozen', False)
         if frozen_windows:
             ctypes.windll.kernel32.SetDllDirectoryW(None)
+        env = dict(os.environ)
+        env['KIMI_CODE_HOME'] = str(kimi_home())
         try:
             self.process = subprocess.Popen([find_kimi(), 'acp'], cwd=self.cwd,
                 stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
-                text=True, encoding='utf-8', creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
+                text=True, encoding='utf-8', env=env,
+                creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
         finally:
             if frozen_windows:
                 ctypes.windll.kernel32.SetDllDirectoryW(sys._MEIPASS)

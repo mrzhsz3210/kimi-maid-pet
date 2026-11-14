@@ -14,7 +14,7 @@
 
 ## 后端架构
 
-- `app/chat_backend.py`：`KimiSession` 通过 stdio JSON-RPC 驱动 `kimi acp`（initialize → session/new|load → session/prompt；session/update 流式事件；session/request_permission 权限确认）。
+- `app/chat_backend.py`：`KimiSession` 通过 stdio JSON-RPC 驱动 `kimi acp`（initialize → session/new|load → session/prompt；session/update 流式事件；session/request_permission 权限确认）。acp 进程使用隔离的 `KIMI_CODE_HOME`（`kimi_home()` 创建并从 `~/.kimi-code` 播种配置与 credentials 目录联接），避免桌宠会话被桌面客户端索引（桌面客户端打开 ACP 会话会因"updated by another client"重试卡死）。
 - `app/desktop_task_sync.py`：每 2 秒只读扫描 `~/.kimi-code/sessions/*/*/state.json`（mtime 变化才读取）；只使用会话标题、lastPrompt、lastTurnReason、updatedAt 等元信息，不读 wire.jsonl 对话内容。
 - `app/quota.py`：定位 kimi CLI 并确认可用；Kimi 暂无公开额度接口。
 - 聊天模式（chat）不授予任何工具权限（permission 一律 cancelled）；工作模式（work）走正常审批。
