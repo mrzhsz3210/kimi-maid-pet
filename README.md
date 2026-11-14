@@ -58,3 +58,7 @@ outputs/Kimi娘桌宠素材/   动画素材与清单
 tools/          ffmpeg（透明 WebM 解码，需自备）
 work/           构建与测试工具
 ```
+
+## 支持作者
+
+如果这个桌宠给你带来了好心情，可以来我的爱发电坐坐：[afdian.com/a/mrzhsz3210](https://afdian.com/a/mrzhsz3210)
