@@ -712,6 +712,17 @@ class Pet(QWidget):
             calm.clicked.connect(self.calm_mood)
             done=QPushButton('完成',dialog);done.clicked.connect(dialog.accept)
             row2.addWidget(calm);row2.addWidget(done);layout.addLayout(row2)
+            layout.addWidget(QLabel('性格底子（大五简版，影响她情绪反应的幅度与恢复速度）：',dialog))
+            traits=[('neuroticism','神经质：高=敏感，负面心情涨得快、消得慢'),
+                    ('extraversion','外向性：高=更容易开心，快乐基线更高'),
+                    ('agreeableness','宜人性：高=不容易生气')]
+            self.big5_sliders={}
+            for key,desc in traits:
+                label=QLabel(desc,dialog);label.setWordWrap(True);layout.addWidget(label)
+                slider=QSlider(Qt.Orientation.Horizontal,dialog);slider.setRange(1,5)
+                slider.setValue(self.mood.big5[key])
+                slider.valueChanged.connect(lambda v,k=key:self.adjust_big5(k,v))
+                layout.addWidget(slider);self.big5_sliders[key]=slider
             self.mood_dialog=dialog
         self.refresh_mood_panel()
         self.position_size_dialog(reserve=True,dialog=self.mood_dialog)
@@ -726,6 +737,9 @@ class Pet(QWidget):
     def calm_mood(self):
         self.mood.owner_reset();self.refresh_mood_panel()
         self.say('呜……被主人摸了摸头，心里平静多了。',4000)
+    def adjust_big5(self,key,value):
+        if self.mood.big5[key]==value:return
+        self.mood.set_big5({key:value});self.refresh_mood_panel()
     def show_persona_editor(self):
         from PySide6.QtWidgets import QPlainTextEdit
         from chat_backend import persona_text

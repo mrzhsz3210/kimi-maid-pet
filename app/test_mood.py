@@ -102,6 +102,16 @@ class MoodTests(unittest.TestCase):
         self.assertIn('当前心情', line)
         self.assertIn('<mood>', PROMPT_INSTRUCTION)
 
+    def test_big5_persisted_and_owner_adjustable(self):
+        result = self.mood.set_big5({'neuroticism': 5})
+        self.assertEqual(result['status'], 'owner_adjustment')
+        reloaded = MoodService(self.tmp.name, clock=lambda: self.now[0])
+        self.assertEqual(reloaded.big5['neuroticism'], 5)
+        self.assertAlmostEqual(reloaded.amplitude('sorrow'), 1 + 0.15 * 2)
+        self.assertAlmostEqual(reloaded.joy_baseline(), 4 - 0.5 - 0.5)
+        result = reloaded.set_big5({'neuroticism': 99})
+        self.assertEqual(reloaded.big5['neuroticism'], 5)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -39,6 +39,16 @@ class MoodService:
         self.state = None
         self._load()
 
+    def set_big5(self, scores):
+        """主人调整性格底子（神经质/外向性/宜人性，各 1–5），记账。"""
+        for key in ('neuroticism', 'extraversion', 'agreeableness'):
+            if key in scores:
+                self.big5[key] = max(1, min(5, int(scores[key])))
+        self.state['big5'] = dict(self.big5)
+        self._save()
+        return self._record('owner_adjustment', {}, {}, 'owner_adjustment', self.clock(),
+                            '性格底子调整为 ' + '/'.join(str(self.big5[k]) for k in ('neuroticism', 'extraversion', 'agreeableness')))
+
     # ---------- 大五换算 ----------
     @property
     def offsets(self):
@@ -72,6 +82,8 @@ class MoodService:
                 data = json.loads(self.state_path.read_text(encoding='utf-8'))
                 if data.get('axes'):
                     self.state = data
+                    if data.get('big5'):
+                        self.big5.update(data['big5'])
                     return
             except (OSError, ValueError):
                 pass
