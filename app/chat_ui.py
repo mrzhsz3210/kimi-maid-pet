@@ -129,11 +129,11 @@ class TaskWorker(QThread):
     failed = Signal(str, bool)
     request = Signal(str, object)
 
-    def __init__(self, cwd, thread_id, prompt, parent=None, mode='work', session=None):
+    def __init__(self, cwd, thread_id, prompt, parent=None, mode='work', session=None, mood=None):
         super().__init__(parent)
         self.cancel = threading.Event();self.responses=queue.Queue()
         self.cwd, self.thread_id, self.prompt = cwd, thread_id, prompt
-        self.mode=mode;self.session=session
+        self.mode=mode;self.session=session;self.mood=mood
 
     def ask(self, method, params):
         self.request.emit(method, params)
@@ -143,9 +143,9 @@ class TaskWorker(QThread):
         raise TaskCancelled('主人，我先停下来啦。')
 
     def run(self):
-        session=self.session or KimiSession(self.cwd,self.thread_id,self.cancel,self.event.emit,self.ask,mode=self.mode)
+        session=self.session or KimiSession(self.cwd,self.thread_id,self.cancel,self.event.emit,self.ask,mode=self.mode,mood=self.mood)
         self.session=session
-        session.cancel=self.cancel;session.emit=self.event.emit;session.ask=self.ask
+        session.cancel=self.cancel;session.emit=self.event.emit;session.ask=self.ask;session.mood=self.mood
         try:self.ready.emit(session.run(self.prompt))
         except TaskCancelled as error:session.close();self.failed.emit(str(error), True)
         except Exception as error:session.close();self.failed.emit(str(error), False)
@@ -252,7 +252,8 @@ class ChatController(QObject):
         previous=getattr(self.worker,'session',None) if self.worker else None
         mode='work'
         if previous and (previous.thread_id!=self.active.get('threadId') or previous.mode!=mode):previous.close();previous=None
-        self.worker=TaskWorker(self.active['cwd'],self.active.get('threadId'),prompt,self,mode=mode,session=previous)
+        mood=self.pet.mood if self.pet.settings.value('moodSolicit',True,type=bool) else None
+        self.worker=TaskWorker(self.active['cwd'],self.active.get('threadId'),prompt,self,mode=mode,session=previous,mood=mood)
         self.worker.event.connect(self.receive);self.worker.ready.connect(self.completed);self.worker.failed.connect(self.failed)
         self.worker.request.connect(self.request);self.worker.start()
 

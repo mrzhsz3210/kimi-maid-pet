@@ -4,12 +4,13 @@ from collections import OrderedDict
 from PIL import Image
 from PySide6.QtCore import Qt, QTimer, QThread, Signal, QPoint, QPointF, QRect, QRectF, QSize, QSettings, QEvent
 from PySide6.QtGui import QImage, QPixmap, QPainter, QRegion, QCursor, QIcon, QTransform
-from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QMenu, QMessageBox, QProgressDialog, QPushButton, QSystemTrayIcon, QTextBrowser, QSlider, QDialog, QCheckBox
+from PySide6.QtWidgets import QApplication, QWidget, QLabel, QVBoxLayout, QHBoxLayout, QMenu, QMessageBox, QProgressDialog, QPushButton, QSystemTrayIcon, QTextBrowser, QSlider, QDialog, QCheckBox
 from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from version import VERSION
 from movement import plan_movement, movement_fraction
+from mood import MoodService
 
-from platform_support import resource_root,state_root,configure_mac_window
+from platform_support import resource_root,state_root,configure_mac_window,user_data
 ROOT=resource_root()
 STATE_ROOT=state_root()
 ASSETS=ROOT/'outputs/Kimi娘桌宠素材'
@@ -119,6 +120,7 @@ class Pet(QWidget):
         self.task_active=False
         self.manual_hidden=False;self.fullscreen_hidden=False;self.hidden_since=None
         self.settings=QSettings('KimiMaidPet','DesktopPet')
+        self.mood=MoodService(user_data())
         self.bubble_percent=max(50,min(150,self.settings.value('bubblePercent',100,type=int)))
         self.task_bubbles_disabled=self.settings.value('taskBubblesDisabled',False,type=bool)
         self.sound_disabled=self.settings.value('soundDisabled',False,type=bool)
@@ -640,6 +642,8 @@ class Pet(QWidget):
         menu.addAction('关闭对话模式' if self.chat and self.chat.enabled else '打开对话模式',self.toggle_chat)
         menu.addAction('查看历史对话',self.open_history)
         menu.addAction('对话框大小…',self.show_bubble_settings)
+        menu.addAction('她此刻的心情…',self.show_mood_panel)
+        menu.addAction('编辑人设…',self.show_persona_editor)
         menu.addSeparator()
         interaction=QMenu('互动差分动画',menu);menu.addMenu(interaction)
         for item in self.variants:
@@ -682,6 +686,78 @@ class Pet(QWidget):
         self.bubble.set_scale_percent(self.bubble_percent)
         self.settings.setValue('bubblePercent',self.bubble_percent)
         if self.bubble.isVisible():self.position_bubble()
+    def show_mood_panel(self):
+        from PySide6.QtWidgets import QProgressBar
+        if not hasattr(self,'mood_dialog'):
+            dialog=QDialog(self,Qt.WindowType.Tool|Qt.WindowType.WindowStaysOnTopHint)
+            dialog.setWindowTitle('她此刻的心情');layout=QVBoxLayout(dialog)
+            layout.setContentsMargins(18,16,18,16);layout.setSpacing(8)
+            names={'joy':'快乐','anger':'生气','sorrow':'难过','fear':'害怕'}
+            self.mood_bars={}
+            for axis in ('joy','anger','sorrow','fear'):
+                row=QVBoxLayout();label=QLabel(dialog);bar=QProgressBar(dialog)
+                bar.setRange(0,10);bar.setTextVisible(False);bar.setMinimumWidth(240)
+                row.addWidget(label);row.addWidget(bar);layout.addLayout(row)
+                self.mood_bars[axis]=(label,bar)
+            self.mood_reason=QLabel(dialog);self.mood_reason.setWordWrap(True)
+            layout.addWidget(self.mood_reason)
+            solicit=QCheckBox('聊天时征求她的心情提案',dialog)
+            solicit.setToolTip('开启后，每轮聊天会顺带请她报告心情变化（约多花 100 token）；关闭则心情只随时间衰减。')
+            solicit.setChecked(self.settings.value('moodSolicit',True,type=bool))
+            solicit.toggled.connect(lambda on:self.settings.setValue('moodSolicit',on))
+            layout.addWidget(solicit)
+            row2=QHBoxLayout()
+            calm=QPushButton('安抚她（恢复平静）',dialog)
+            calm.setToolTip('主人直接安抚：四轴回到基线，记一笔「主人安抚」。')
+            calm.clicked.connect(self.calm_mood)
+            done=QPushButton('完成',dialog);done.clicked.connect(dialog.accept)
+            row2.addWidget(calm);row2.addWidget(done);layout.addLayout(row2)
+            self.mood_dialog=dialog
+        self.refresh_mood_panel()
+        self.position_size_dialog(reserve=True,dialog=self.mood_dialog)
+        self.mood_dialog.show();self.mood_dialog.raise_();self.mood_dialog.activateWindow()
+    def refresh_mood_panel(self):
+        names={'joy':'快乐','anger':'生气','sorrow':'难过','fear':'害怕'}
+        values=self.mood.current()
+        for axis,(label,bar) in self.mood_bars.items():
+            bar.setValue(round(values[axis]));label.setText(f'{names[axis]}：{values[axis]:g} / 10')
+        reason=self.mood.state.get('lastReason') or '还没有心情记录，跟她聊聊看？'
+        self.mood_reason.setText('最近缘由：'+reason)
+    def calm_mood(self):
+        self.mood.owner_reset();self.refresh_mood_panel()
+        self.say('呜……被主人摸了摸头，心里平静多了。',4000)
+    def show_persona_editor(self):
+        from PySide6.QtWidgets import QPlainTextEdit
+        from chat_backend import persona_text
+        if not hasattr(self,'persona_dialog'):
+            dialog=QDialog(self,Qt.WindowType.Tool|Qt.WindowType.WindowStaysOnTopHint)
+            dialog.setWindowTitle('编辑人设');layout=QVBoxLayout(dialog)
+            layout.setContentsMargins(14,12,14,12);layout.setSpacing(8)
+            hint=QLabel('写下你心中 Kimi娘 的性格与说话方式。保存后从下一段新对话开始生效。',dialog)
+            hint.setWordWrap(True);layout.addWidget(hint)
+            self.persona_edit=QPlainTextEdit(dialog);self.persona_edit.setMinimumSize(420,260)
+            layout.addWidget(self.persona_edit)
+            row=QHBoxLayout()
+            restore=QPushButton('恢复默认',dialog)
+            restore.clicked.connect(self.restore_persona)
+            save=QPushButton('保存',dialog);save.clicked.connect(self.save_persona)
+            row.addWidget(restore);row.addWidget(save);layout.addLayout(row)
+            self.persona_dialog=dialog
+        self.persona_edit.setPlainText(persona_text())
+        self.persona_dialog.show();self.persona_dialog.raise_();self.persona_dialog.activateWindow()
+    def save_persona(self):
+        from chat_backend import PERSONA
+        text=self.persona_edit.toPlainText().strip()
+        path=user_data()/'persona.md'
+        try:
+            if text and text!=PERSONA:path.parent.mkdir(parents=True,exist_ok=True);path.write_text(text,encoding='utf-8')
+            elif path.exists():path.unlink()
+            self.persona_dialog.accept();self.say('记住啦，主人。下次聊天我就是新的我了。',4000)
+        except OSError as error:
+            self.say('唔，人设没存下来：'+str(error),8000)
+    def restore_persona(self):
+        from chat_backend import PERSONA
+        self.persona_edit.setPlainText(PERSONA)
     def show_bubble_settings(self):
         if not hasattr(self,'bubble_settings_dialog'):
             dialog=QDialog(self,Qt.WindowType.Tool|Qt.WindowType.WindowStaysOnTopHint)
@@ -815,7 +891,9 @@ class Pet(QWidget):
         pool=self.interaction_animations()
         previous=self.current.get('id') if self.current else None
         available=[v for v in pool if v['id']!=previous and v['id']!='knockback'] or pool
-        if available:self.choose(random.choice(available))
+        if available:
+            weights=self.mood.variant_weights()
+            self.choose(random.choices(available,weights=[weights.get(v['id'],1.0) for v in available])[0])
     def interaction_animations(self):
         # Single clicks pick from interaction variants only; work animations
         # belong to real tasks (and stay previewable via the context menu).

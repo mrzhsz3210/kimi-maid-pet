@@ -23,6 +23,19 @@ PERSONA = ('你是「Kimi娘」，一位住在用户桌面上的星空女仆：�
            '角色口吻不改变用户的任务范围、访问权限或审批要求。')
 
 
+def persona_text():
+    """主人可编辑的人设：优先读 用户数据目录/persona.md，缺省用内置版本。"""
+    path = data_directory() / 'persona.md'
+    try:
+        if path.is_file():
+            text = path.read_text(encoding='utf-8').strip()
+            if text:
+                return text
+    except OSError:
+        pass
+    return PERSONA
+
+
 class TaskCancelled(RuntimeError):
     pass
 
@@ -109,12 +122,13 @@ class HistoryStore:
 
 class KimiSession:
     """One worker owns the kimi acp process; callbacks deliver public protocol events."""
-    def __init__(self, cwd, thread_id=None, cancel=None, emit=None, ask=None, mode='work'):
+    def __init__(self, cwd, thread_id=None, cancel=None, emit=None, ask=None, mode='work', mood=None):
         self.cwd = str(Path(cwd).resolve())
         self.thread_id = thread_id
         self.cancel = cancel or threading.Event()
         self.emit = emit or (lambda kind, value: None)
         self.ask = ask or (lambda method, params: None)
+        self.mood = mood
         self.process = None
         self.messages = queue.Queue()
         self.sequence = 0
@@ -277,11 +291,13 @@ class KimiSession:
                 self.open_thread()
                 self.initialized = True
                 self.emit('thread', self.thread_id)
-                instruction = PERSONA + ('当前为聊天模式：只根据对话直接交流，回答简短自然；不要查看或更改文件，不调用工具、不运行命令。如需实际操作，提醒主人切换工作模式。' if self.mode == 'chat' else '')
+                instruction = persona_text() + ('当前为聊天模式：只根据对话直接交流，回答简短自然；不要查看或更改文件，不调用工具、不运行命令。如需实际操作，提醒主人切换工作模式。' if self.mode == 'chat' else '')
                 prompt = '<角色设定>\n' + instruction + '\n</角色设定>\n\n' + prompt
             else:
                 while not self.messages.empty():
                     self.messages.get_nowait()
+            if self.mood:
+                prompt += '\n\n' + self.mood.injection()
             self.sequence += 1
             request_id = self.sequence
             self.send({'id': request_id, 'method': 'session/prompt',
@@ -301,8 +317,14 @@ class KimiSession:
                 result = message.get('result') or {}
                 stop = result.get('stopReason')
                 if stop in (None, 'end_turn'):
-                    return {'threadId': self.thread_id, 'text': self.final_text() or '任务已完成，未返回文字结果。',
-                            'transcript': self.transcript()}
+                    text = self.final_text() or '任务已完成，未返回文字结果。'
+                    transcript = self.transcript()
+                    if self.mood:
+                        proposal, text = self.mood.extract(text)
+                        _, transcript = self.mood.extract(transcript)
+                        if proposal is not None:
+                            self.mood.adjudicate(proposal)
+                    return {'threadId': self.thread_id, 'text': text, 'transcript': transcript}
                 if stop == 'cancelled':
                     raise TaskCancelled('任务已停止，已有输出保存在历史对话中。')
                 raise RuntimeError('任务没有成功完成（' + str(stop) + '）。')
