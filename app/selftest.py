@@ -44,7 +44,7 @@ def run(root):
         press=SimpleNamespace(button=lambda:__import__('PySide6.QtCore',fromlist=['Qt']).Qt.MouseButton.LeftButton,globalPosition=lambda:QPointF(200,200))
         move=SimpleNamespace(buttons=press.button,globalPosition=lambda:QPointF(240,230))
         pet.mousePressEvent(press);pet.mouseMoveEvent(move);assert pet.mode=='drag'
-        pet.mouseReleaseEvent(press);assert pet.mode=='landing' and pet.current['durationMs']==2000
+        pet.mouseReleaseEvent(press);assert pet.mode=='landing' and pet.current['durationMs']==1500
         report['checks'].append('拖拽与2秒落地切换正常')
         for position in [QPoint(-999,-999),QPoint(5000,5000)]:
             area=QRect(0,0,1920,1040);assert area.contains(QRect(clamp_position(position,QSize(256,256),area),QSize(256,256)))

@@ -39,6 +39,19 @@ class Tests(unittest.TestCase):
             self.pet.single_click()
             self.assertEqual(choose.call_args.args[0]['id'],'knockback')
             self.pet.click_streak=0
+    def test_deprecated_work_and_mood_idles(self):
+        p=self.pet
+        self.assertEqual({v['id'] for v in p.regular_work_animations()},{'work01','work02'})
+        self.assertEqual(len(p.mood_idles),12)
+        self.assertEqual(len(p.extra_idles),4)
+        # 心情主导轴让对应站立待机进入 idle 候选
+        p.mood.state['axes'].update(joy=8.0,anger=1.0,sorrow=1.0,fear=1.0)
+        p.mood.state['updatedAt']=time.time()
+        p.task_active=False;p.dock_edge=None;p.next_leisure_at=time.monotonic()+999
+        with patch('pet.random.choices',return_value=[next(v for v in p.mood_idles if v['id']=='idle07')]) as choices:
+            p.idle()
+            self.assertEqual(p.current['id'],'idle07')
+        p.mood.state['axes'].update(joy=p.mood.joy_baseline());p.mood.state['updatedAt']=time.time()
     def test_menu_contains_all_variants_and_exit(self):
         actions=[]
         def inspect():
@@ -57,15 +70,15 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.pet.mode,'drag');self.assertEqual(self.pet.current['id'],'drag')
         self.pet.started=time.monotonic()-4.1;self.pet.animate();self.assertEqual(self.pet.mode,'drag')
         self.pet.mouseReleaseEvent(press)
-        self.assertEqual(self.pet.mode,'landing');self.assertEqual(len(self.pet.frames),48)
-        self.assertEqual(self.pet.current['durationMs'],2000);self.assertFalse(self.pet.click_timer.isActive())
-        self.pet.started=time.monotonic()-2.1;self.pet.animate();self.assertEqual(self.pet.mode,'idle')
+        self.assertEqual(self.pet.mode,'landing');self.assertEqual(len(self.pet.frames),36)
+        self.assertEqual(self.pet.current['durationMs'],1500);self.assertFalse(self.pet.click_timer.isActive())
+        self.pet.started=time.monotonic()-1.6;self.pet.animate();self.assertEqual(self.pet.mode,'idle')
     def test_interaction_frames_survive_variant_eviction(self):
         for item in self.pet.variants[:3]:self.pet.load(item)
         with patch('pet.gzip.decompress',side_effect=AssertionError('drag must not decode on mouse movement')):
             drag=self.pet.manifest['dragAnimation'];landing=self.pet.manifest['landingAnimation']
             self.assertIs(self.pet.load(drag),self.pet.pinned_frames[str(self.pet.asset_path(drag))])
-            self.assertEqual(len(self.pet.load(landing)),48)
+            self.assertEqual(len(self.pet.load(landing)),36)
     def test_variant_cache_bounded_and_idle_return_is_warm(self):
         for item in self.pet.variants:
             self.pet.choose(item)

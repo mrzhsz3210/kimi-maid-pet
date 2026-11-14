@@ -84,6 +84,198 @@
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/idle06.webm",
       "loop": false
+    },
+    {
+      "id": "idle07",
+      "name": "待机动作07 · 喜·站立",
+      "file": "透明WebM/idle07.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle07.webm",
+      "loop": false,
+      "line": "好开心呀～",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle08",
+      "name": "待机动作08 · 怒·站立",
+      "file": "透明WebM/idle08.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle08.webm",
+      "loop": false,
+      "line": "哼，别捣乱啦",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle09",
+      "name": "待机动作09 · 哀·站立",
+      "file": "透明WebM/idle09.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle09.webm",
+      "loop": false,
+      "line": "呜……有点难过",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle10",
+      "name": "待机动作10 · 惧·站立",
+      "file": "透明WebM/idle10.webm",
+      "durationMs": 4000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle10.webm",
+      "loop": false,
+      "line": "不要过来……",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle11",
+      "name": "待机动作11 · 喜·坐姿",
+      "file": "透明WebM/idle11.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle11.webm",
+      "loop": false,
+      "line": "坐着也很开心",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle12",
+      "name": "待机动作12 · 怒·坐姿",
+      "file": "透明WebM/idle12.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle12.webm",
+      "loop": false,
+      "line": "哼，闹脾气了",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle13",
+      "name": "待机动作13 · 哀·坐姿",
+      "file": "透明WebM/idle13.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle13.webm",
+      "loop": false,
+      "line": "呜……好想被安慰",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle14",
+      "name": "待机动作14 · 惧·坐姿",
+      "file": "透明WebM/idle14.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle14.webm",
+      "loop": false,
+      "line": "缩成一团……",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle15",
+      "name": "待机动作15 · 喜·跪姿",
+      "file": "透明WebM/idle15.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle15.webm",
+      "loop": false,
+      "line": "跪坐着也满足",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle16",
+      "name": "待机动作16 · 怒·跪姿",
+      "file": "透明WebM/idle16.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle16.webm",
+      "loop": false,
+      "line": "哼，不服气",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle17",
+      "name": "待机动作17 · 哀·跪姿",
+      "file": "透明WebM/idle17.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle17.webm",
+      "loop": false,
+      "line": "眼泪停不下来……",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle18",
+      "name": "待机动作18 · 惧·跪姿",
+      "file": "透明WebM/idle18.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle18.webm",
+      "loop": false,
+      "line": "害怕得发抖……",
+      "bubble": "由桌宠程序独立显示"
     }
   ],
   "variants": [
@@ -345,7 +537,7 @@
     "id": "landing",
     "name": "落地",
     "file": "透明WebM/landing.webm",
-    "durationMs": 2000,
+    "durationMs": 1500,
     "renderScale": 1.0,
     "renderOffset": [
       0.0,
@@ -357,9 +549,9 @@
   "workAnimations": [
     {
       "id": "work01",
-      "name": "收到任务",
+      "name": "坐姿敲电脑",
       "file": "透明WebM/work01.webm",
-      "durationMs": 4042,
+      "durationMs": 6000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -367,14 +559,14 @@
       ],
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/work01.webm",
-      "line": "收到，马上开工！",
+      "line": "上班中...",
       "bubble": "仅手动互动触发，自动工作播放不显示台词"
     },
     {
       "id": "work02",
-      "name": "处理任务",
+      "name": "取书翻阅书写流程",
       "file": "透明WebM/work02.webm",
-      "durationMs": 6042,
+      "durationMs": 10000,
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
@@ -382,7 +574,22 @@
       ],
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/work02.webm",
-      "line": "上班中...",
+      "line": "我需要思考...",
+      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+    },
+    {
+      "id": "work06",
+      "name": "报错炸烟趴地晕眩",
+      "file": "透明WebM/work06.webm",
+      "durationMs": 6000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/work06.webm",
+      "line": "呜……又报错啦……",
       "bubble": "仅手动互动触发，自动工作播放不显示台词"
     },
     {
@@ -398,7 +605,8 @@
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/work03.webm",
       "line": "打扫完了！",
-      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+      "bubble": "仅手动互动触发，自动工作播放不显示台词",
+      "deprecated": true
     },
     {
       "id": "work04",
@@ -413,7 +621,8 @@
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/work04.webm",
       "line": "我需要思考...",
-      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+      "bubble": "仅手动互动触发，自动工作播放不显示台词",
+      "deprecated": true
     },
     {
       "id": "work05",
@@ -428,22 +637,8 @@
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/work05.webm",
       "line": "让我看看~",
-      "bubble": "仅手动互动触发，自动工作播放不显示台词"
-    },
-    {
-      "id": "work06",
-      "name": "报错趴地晕眩",
-      "file": "透明WebM/work06.webm",
-      "durationMs": 4000,
-      "renderScale": 1.0,
-      "renderOffset": [
-        0.0,
-        0.0
-      ],
-      "renderAnchor": "bottom-center",
-      "playbackFile": "透明WebM/work06.webm",
-      "line": "呜……又报错啦……",
-      "bubble": "仅手动互动触发，自动工作播放不显示台词"
+      "bubble": "仅手动互动触发，自动工作播放不显示台词",
+      "deprecated": true
     }
   ],
   "movementAnimations": [
@@ -535,7 +730,8 @@
         45,
         80
       ],
-      "movementSpeed": 0.65
+      "movementSpeed": 0.65,
+      "deprecated": true
     },
     {
       "id": "move03right",
@@ -557,7 +753,8 @@
         45,
         80
       ],
-      "movementSpeed": 0.65
+      "movementSpeed": 0.65,
+      "deprecated": true
     }
   ]
 }

@@ -182,23 +182,21 @@ class MovementTests(unittest.TestCase):
                 p.set_size_percent(previous)
         finally:p.size_dialog.hide();menu.deleteLater()
 
-    def test_left_flight_waits_for_second_flap(self):
-        p=self.pet;left=next(v for v in p.movement_slots if v['id']=='move03left');origin=QPoint(p.pos())
+    def test_left_walk_waits_for_first_step(self):
+        p=self.pet;left=next(v for v in p.movement_slots if v['id']=='move01left');origin=QPoint(p.pos())
         with patch('pet.plan_movement',return_value=((320,150),True)):
             p.start_movement(left,manual=True)
-        p.advance_movement(3.124);self.assertEqual(p.pos(),origin)
-        p.advance_movement(4.5);self.assertNotEqual(p.pos(),origin)
+        p.advance_movement(0.4);self.assertEqual(p.pos(),origin)
+        p.advance_movement(1.0);self.assertNotEqual(p.pos(),origin)
 
-    def test_flight_assets_and_direction_parameters(self):
-        p=self.pet;self.assertEqual(len(p.movement_slots),6)
-        flights=[v for v in p.movement_slots if v['number']=='03']
-        self.assertEqual(len(flights),2)
-        for item in flights:
-            self.assertEqual(item['durationMs'],9000)
-            self.assertEqual(len(p.pinned_frames[str(p.asset_path(item))]),216)
+    def test_deprecated_movements_stay_out_of_auto_pool(self):
+        p=self.pet;self.assertEqual(len(p.movement_slots),4)
+        self.assertEqual({v['id'] for v in p.movement_slots},{'move01left','move01right','move02','move02left'})
+        deprecated=[v for v in p.movement_all if v.get('deprecated')]
+        self.assertEqual({v['id'] for v in deprecated},{'move03left','move03right'})
+        for item in p.movement_slots:
             with patch('pet.plan_movement',return_value=((320,200),False)) as planner:
                 self.assertTrue(p.start_movement(item,manual=True))
-                self.assertEqual(planner.call_args.kwargs['angle_range'],[45,80])
                 self.assertEqual(planner.call_args.kwargs['allowed_directions'],(-1,) if item['sourceFacing']=='left' else (1,))
             self.assertFalse(p.movement_mirrored)
 
@@ -235,8 +233,10 @@ class MovementTests(unittest.TestCase):
         p.next_leisure_at=now+1;p.next_leisure_group='idle'
         self.assertFalse(p.try_leisure())
         p.next_leisure_at=0
-        with patch('pet.random.choice',return_value=p.extra_idles[0]) as choose:
-            self.assertTrue(p.try_leisure());choose.assert_called_once_with(p.extra_idles)
+        with patch('pet.random.choices',return_value=[p.extra_idles[0]]) as choose:
+            self.assertTrue(p.try_leisure())
+            called_pool=choose.call_args.args[0]
+            self.assertTrue(all(v in called_pool for v in p.extra_idles))
         self.assertEqual(p.mode,'leisure');self.assertEqual(p.next_leisure_group,'movement')
         p.next_leisure_at=0
         with patch.object(p,'start_movement',return_value=True) as start:

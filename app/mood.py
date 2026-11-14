@@ -190,6 +190,19 @@ class MoodService:
         return {'status': status, 'applied': applied, 'limited': limited or {}}
 
     # ---------- 心情 → 动画权重 ----------
+    def dominant_axis(self, now=None, joy_margin=2.0, neg_threshold=4.0):
+        """主导心情轴：joy 高于基线 joy_margin 且不低于任何负性轴 → 'joy'；
+        负性轴达到 neg_threshold → 最强的负性轴；否则 None（中性）。"""
+        mood = self.current(now)
+        neg = {a: mood[a] for a in ('anger', 'sorrow', 'fear')}
+        worst = max(neg, key=neg.get)
+        joy_delta = mood['joy'] - self.joy_baseline()
+        if joy_delta >= joy_margin and joy_delta >= neg[worst] - 1:
+            return 'joy'
+        if neg[worst] >= neg_threshold:
+            return worst
+        return None
+
     def variant_weights(self, now=None):
         """返回互动差分 id → 权重倍率。基准 1.0，心情轴每偏离基线 2 分增减一档。"""
         mood = self.current(now)

@@ -112,6 +112,17 @@ class MoodTests(unittest.TestCase):
         result = reloaded.set_big5({'neuroticism': 99})
         self.assertEqual(reloaded.big5['neuroticism'], 5)
 
+    def test_dominant_axis(self):
+        self.assertIsNone(self.mood.dominant_axis())
+        self.mood.state['axes'].update(joy=7.0, anger=1.0, sorrow=1.0, fear=1.0)
+        self.mood.state['updatedAt'] = self.now[0]
+        self.assertEqual(self.mood.dominant_axis(), 'joy')
+        self.mood.state['axes'].update(joy=3.75, sorrow=6.0)
+        self.assertEqual(self.mood.dominant_axis(), 'sorrow')
+        # 快乐很高但愤怒更高时，负性优先由幅度比较决定
+        self.mood.state['axes'].update(joy=7.0, anger=6.5)
+        self.assertEqual(self.mood.dominant_axis(), 'anger')
+
 
 if __name__ == '__main__':
     unittest.main()

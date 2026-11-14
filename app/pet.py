@@ -110,6 +110,10 @@ class Pet(QWidget):
         self.variants=[v for v in self.manifest['variants'] if self.asset_path(v).is_file()]
         self.idles=[self.manifest['idle']]+self.manifest.get('additionalIdleAnimations',[])[:1]
         self.extra_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in ('idle03','idle04','idle05','idle06') and self.asset_path(v).is_file()]
+        # 心情待机：idle07–10 站立（喜怒哀惧）、idle11–14 坐姿、idle15–18 跪姿
+        self.mood_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in
+                         ('idle07','idle08','idle09','idle10','idle11','idle12','idle13','idle14','idle15','idle16','idle17','idle18')
+                         and self.asset_path(v).is_file()]
         self.next_leisure_group='idle';self.next_leisure_at=time.monotonic()+15.0
         self.cache=OrderedDict();self.pinned_frames={};self.frames=[];self.current=None;self.mode='idle';self.index=0
         self.frame_size=min(512,max(256,round(256*max(s.devicePixelRatio() for s in QApplication.screens()))))
@@ -132,7 +136,8 @@ class Pet(QWidget):
         self.auto_movement_disabled=self.settings.value('autoMovementDisabled',False,type=bool)
         self.dock_edge=None
         self.work_slots=self.manifest.get('workAnimations',[])[:6]
-        self.movement_slots=[v for v in self.manifest.get('movementAnimations',[]) if v and self.asset_path(v).is_file()]
+        self.movement_slots=[v for v in self.manifest.get('movementAnimations',[]) if v and not v.get('deprecated') and self.asset_path(v).is_file()]
+        self.movement_all=[v for v in self.manifest.get('movementAnimations',[]) if v and self.asset_path(v).is_file()]
         self.movement_plan=None;self.movement_mirrored=False;self.pointer_down=False
         self.last_interaction=time.monotonic();self.movement_ready_at=0.0
         self.click_timer=QTimer(self);self.click_timer.setTimerType(Qt.TimerType.PreciseTimer);self.click_timer.setSingleShot(True);self.click_timer.setInterval(250);self.click_timer.timeout.connect(self.single_click)
@@ -150,7 +155,7 @@ class Pet(QWidget):
         self.idle()
         # User prefers immediate interaction: decode all actions once at startup
         # and retain them even while hidden, without running the animation timer.
-        items=self.idles+self.extra_idles+self.variants+self.movement_slots+[v for v in self.work_slots if v and self.asset_path(v).is_file()]+[self.manifest[name] for name in ('dragAnimation','landingAnimation') if self.manifest.get(name)]
+        items=self.idles+self.extra_idles+self.mood_idles+self.variants+self.movement_slots+[v for v in self.work_slots if v and self.asset_path(v).is_file()]+[self.manifest[name] for name in ('dragAnimation','landingAnimation') if self.manifest.get(name)]
         items += [self.return_transition_item(v) for v in self.variants if v.get('returnTransition')]
         progress=None
         if QApplication.platformName()!='offscreen':
@@ -436,7 +441,13 @@ class Pet(QWidget):
             self.play(random.choice(pool),'working')
             return
         if self.try_leisure():return
-        item=random.choices(self.idles,weights=[4,1][:len(self.idles)])[0]
+        axis=self.mood.dominant_axis()
+        standing={'joy':'idle07','anger':'idle08','sorrow':'idle09','fear':'idle10'}.get(axis)
+        mood_idle=next((v for v in self.mood_idles if v['id']==standing),None) if standing else None
+        if mood_idle:
+            item=random.choices([mood_idle]+self.idles,weights=[3,3,1][:1+len(self.idles)])[0]
+        else:
+            item=random.choices(self.idles,weights=[4,1][:len(self.idles)])[0]
         self.play(item,'idle')
     def try_leisure(self):
         now=time.monotonic()
@@ -449,22 +460,28 @@ class Pet(QWidget):
             for item in candidates:
                 if self.start_movement(item):
                     self.next_leisure_group='idle';self.next_leisure_at=now+15;return True
-        if self.extra_idles:
-            self.play(random.choice(self.extra_idles),'leisure')
-            self.next_leisure_group='movement' if not self.auto_movement_disabled else 'idle'
-            self.next_leisure_at=now+15;return True
+        if self.extra_idles or self.mood_idles:
+            axis=self.mood.dominant_axis()
+            poses={'joy':('idle11','idle15'),'anger':('idle12','idle16'),
+                   'sorrow':('idle13','idle17'),'fear':('idle14','idle18')}.get(axis,())
+            mood_pool=[v for v in self.mood_idles if v['id'] in poses]
+            pool=list(self.extra_idles)+mood_pool
+            if pool:
+                weights=[1.0]*len(self.extra_idles)+[2.5]*len(mood_pool)
+                self.play(random.choices(pool,weights=weights)[0],'leisure')
+                self.next_leisure_group='movement' if not self.auto_movement_disabled else 'idle'
+                self.next_leisure_at=now+15;return True
         return False
     def regular_work_animations(self):
-        # work01 is the task-opening, work06 is reserved for failures.
-        return [v for v in self.work_slots if v and v['id'] not in ('work01','work06') and self.asset_path(v).is_file()]
+        # 废弃段与 work06（报错专用）不进工作轮换。
+        return [v for v in self.work_slots if v and not v.get('deprecated') and v['id']!='work06' and self.asset_path(v).is_file()]
     def task_started(self):
         self.note_interaction()
         self.task_active=True
         self.last_task_group=None
         self.click_timer.stop();self.last_click=None
-        work=[v for v in self.work_slots if v and self.asset_path(v).is_file()]
-        opening=next((v for v in work if v['id']=='work01'),None)
-        if opening and not self.dock_edge:self.play(opening,'work-start')
+        work=self.regular_work_animations()
+        if work and not self.dock_edge:self.play(random.choice(work),'working')
         else:self.idle()
     def task_finished(self):
         self.task_active=False
@@ -653,18 +670,20 @@ class Pet(QWidget):
         work=QMenu('工作差分动画',menu);menu.addMenu(work)
         available=[item for item in self.work_slots if item and self.asset_path(item).is_file()]
         for item in available:
-            action=work.addAction(item['id']+' · '+item['name'])
+            label=item['id']+' · '+item['name']+('（已废弃）' if item.get('deprecated') else '')
+            action=work.addAction(label)
             action.triggered.connect(lambda checked=False,v=item:self.choose(v))
         if not available:work.addAction('暂无动作（已预留6个位置）').setEnabled(False)
         idle=QMenu('待机差分动画',menu);menu.addMenu(idle)
-        for index,item in enumerate(self.idles+self.extra_idles):
+        for index,item in enumerate(self.idles+self.extra_idles+self.mood_idles):
             name='默认待机' if index==0 else ('待机动作02' if index==1 else item['name'])
             action=idle.addAction(name);action.triggered.connect(lambda checked=False,v=item:self.preview_idle(v))
         movement=QMenu('移动差分',menu);menu.addMenu(movement)
-        for item in self.movement_slots:
-            action=movement.addAction(item.get('number',item['id'])+' · '+item['name'])
+        for item in self.movement_all:
+            label=item.get('number',item['id'])+' · '+item['name']+('（已废弃）' if item.get('deprecated') else '')
+            action=movement.addAction(label)
             action.triggered.connect(lambda checked=False,v=item:self.start_movement(v,manual=True))
-        if not self.movement_slots:movement.addAction('暂无动作').setEnabled(False)
+        if not self.movement_all:movement.addAction('暂无动作').setEnabled(False)
         movement_switch=menu.addAction('禁用自移动');movement_switch.setCheckable(True)
         movement_switch.setChecked(self.auto_movement_disabled)
         movement_switch.toggled.connect(self.set_auto_movement_disabled)
