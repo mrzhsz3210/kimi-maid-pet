@@ -298,6 +298,20 @@ class Pet(QWidget):
             self.say('主人，托盘暂时没准备好，我先留在这里陪你。');return
         self.manual_hidden=hidden;self.apply_visibility()
     def apply_visibility(self):
+        import json as _json
+        from datetime import datetime as _dt
+        try:
+            culprit = getattr(self.fullscreen_detector, 'last_culprit', None) if hasattr(self, 'fullscreen_detector') else None
+            entry = {'time': _dt.now().isoformat(timespec='seconds'),
+                     'hidden': self.desktop_hidden(), 'manual': self.manual_hidden,
+                     'fullscreen': self.fullscreen_hidden, 'culprit': culprit,
+                     'mode': self.mode, 'autoMoveDisabled': self.auto_movement_disabled}
+            with open(str(STATE_ROOT / 'app' / '可见性日志.jsonl'), 'a', encoding='utf-8') as f:
+                f.write(_json.dumps(entry, ensure_ascii=False) + '\n')
+            if hasattr(self, 'fullscreen_detector'):
+                self.fullscreen_detector.last_culprit = None
+        except OSError:
+            pass
         if self.desktop_hidden():
             if self.hidden_since is None:self.hidden_since=time.monotonic()
             self.dock_click_timer.stop()

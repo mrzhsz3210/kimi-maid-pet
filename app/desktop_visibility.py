@@ -59,4 +59,8 @@ class FullscreenDetector:
         except OSError:
             pass
         m = info.rcMonitor
-        return covers_monitor((rect.left,rect.top,rect.right,rect.bottom), (m.left,m.top,m.right,m.bottom))
+        covered = covers_monitor((rect.left,rect.top,rect.right,rect.bottom), (m.left,m.top,m.right,m.bottom))
+        if covered:
+            self.last_culprit = {'class': name.value, 'pid': pid.value,
+                                 'rect': [rect.left, rect.top, rect.right, rect.bottom]}
+        return covered
