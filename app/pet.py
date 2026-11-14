@@ -9,6 +9,7 @@ from PySide6.QtNetwork import QLocalServer, QLocalSocket
 from version import VERSION
 from movement import plan_movement, movement_fraction
 from mood import MoodService
+from task_stats import load_task_stats, record_task_outcome, conscientiousness
 
 from platform_support import resource_root,state_root,configure_mac_window,user_data
 ROOT=resource_root()
@@ -701,6 +702,8 @@ class Pet(QWidget):
                 self.mood_bars[axis]=(label,bar)
             self.mood_reason=QLabel(dialog);self.mood_reason.setWordWrap(True)
             layout.addWidget(self.mood_reason)
+            self.stats_label=QLabel(dialog);self.stats_label.setWordWrap(True)
+            layout.addWidget(self.stats_label)
             solicit=QCheckBox('聊天时征求她的心情提案',dialog)
             solicit.setToolTip('开启后，每轮聊天会顺带请她报告心情变化（约多花 100 token）；关闭则心情只随时间衰减。')
             solicit.setChecked(self.settings.value('moodSolicit',True,type=bool))
@@ -734,6 +737,17 @@ class Pet(QWidget):
             bar.setValue(round(values[axis]));label.setText(f'{names[axis]}：{values[axis]:g} / 10')
         reason=self.mood.state.get('lastReason') or '还没有心情记录，跟她聊聊看？'
         self.mood_reason.setText('最近缘由：'+reason)
+        stats=load_task_stats(user_data())
+        pet_stats=stats.get('pet',{});synced=stats.get('synced',{})
+        score,total=conscientiousness(stats)
+        done=pet_stats.get('completed',0)
+        line=f'办事记录：她亲手完成 {done} 件 / 共 {total} 件'
+        line+=f'；照看本机 Kimi 会话 完成 {synced.get("completed",0)}、失败 {synced.get("failed",0)}'
+        if score is None:
+            line+='\n尽责性观察值：样本还太少（满 3 件出评分）'
+        else:
+            line+=f'\n尽责性观察值：{score} / 5（由真实完成率换算，仅观察用，不影响心情）'
+        self.stats_label.setText(line)
     def calm_mood(self):
         self.mood.owner_reset();self.refresh_mood_panel()
         self.say('呜……被主人摸了摸头，心里平静多了。',4000)

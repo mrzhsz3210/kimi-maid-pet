@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushB
     QInputDialog, QDialog, QDialogButtonBox)
 
 from chat_backend import HistoryStore, KimiSession, TaskCancelled
+from task_stats import record_task_outcome
 
 FLAGS = Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.Tool
 STYLE = '''QWidget {font-family:"Microsoft YaHei","Segoe UI";font-size:12px;color:#38294d;background:#fcfaff;}
@@ -300,6 +301,7 @@ class ChatController(QObject):
         chat=self.running_chat
         self.running_turn.update(status='completed',result=result['text'],output=result['transcript'])
         self.running_chat['threadId']=result['threadId']
+        record_task_outcome(self.store.directory,'pet','completed')
         self.finish()
         self.pet.task_completed(result['text'],lambda:self.open_history(chat['id']))
 
@@ -307,6 +309,7 @@ class ChatController(QObject):
         if not self.running_turn:return
         chat=self.running_chat
         self.running_turn.update(status='interrupted' if cancelled else 'failed',error=error)
+        record_task_outcome(self.store.directory,'pet','interrupted' if cancelled else 'failed')
         self.finish()
         if not cancelled:self.pet.task_failed()
         self.pet.task_result('主人，我先停下来啦。' if cancelled else '唔，主人，这次遇到一点困难，还没有完成。',error,lambda:self.open_history(chat['id']))

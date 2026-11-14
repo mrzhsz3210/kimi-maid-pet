@@ -150,6 +150,9 @@ class DesktopTaskSync(QObject):
 
     def _finish(self, session, reason, title):
         self.running.discard(session)
+        from platform_support import user_data
+        from task_stats import record_task_outcome
+        record_task_outcome(user_data(), 'synced', 'completed' if reason == TERMINAL_OK else 'failed')
         if not self.running and not (self.pet.chat and self.pet.chat.running_turn):
             self.pet.task_finished()
         if reason == TERMINAL_OK:

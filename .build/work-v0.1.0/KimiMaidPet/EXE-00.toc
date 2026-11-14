@@ -64,7 +64,7 @@
  [],
  False,
  False,
- 1794638965,
+ 1794639600,
  [('runw.exe',
    'C:\\Users\\20802\\Desktop\\《桌面》\\网盘、工具\\kimi-maid-pet\\.build-tools\\PyInstaller\\bootloader\\Windows-64bit-intel\\runw.exe',
    'EXECUTABLE')],
