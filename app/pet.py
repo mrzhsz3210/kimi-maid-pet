@@ -1071,9 +1071,22 @@ def main():
             (STATE_ROOT/'app').mkdir(parents=True,exist_ok=True)
             (STATE_ROOT/'app/运行状态.json').write_text(json.dumps({'version':VERSION,'pid':os.getpid(),'visible':pet.isVisible(),'nativeVisible':native_visible,'windowId':int(pet.winId()),'variants':len(pet.variants),'position':[pet.x(),pet.y()],'displaySize':[pet.width(),pet.height()],'frameSize':[self_size for self_size in (pet.frames[0].width(),pet.frames[0].height())]},ensure_ascii=False),encoding='utf-8')
         QTimer.singleShot(1000,record_startup)
+        diagnostic_timer=QTimer(pet);diagnostic_timer.setInterval(2000)
+        last_diag={'v':None,'p':None,'m':None}
         def record_visibility():
+            state=(pet.isVisible(),pet.manual_hidden,pet.fullscreen_hidden)
+            pos=(pet.x(),pet.y())
+            anim=pet.current.get('id') if pet.current else None
             (STATE_ROOT/'app/显示诊断.json').write_text(json.dumps({'pid':os.getpid(),'visible':pet.isVisible(),'manualHidden':pet.manual_hidden,'fullscreenHidden':pet.fullscreen_hidden,'trayVisible':pet.tray.isVisible(),'trayAvailable':QSystemTrayIcon.isSystemTrayAvailable(),'syncWatching':pet.desktop_sync.timer.isActive(),'syncActive':len(pet.desktop_sync.running),'syncObserved':len(pet.desktop_sync.known),'platform':QApplication.platformName(),'position':[pet.x(),pet.y()],'windowId':int(pet.winId())},ensure_ascii=False),encoding='utf-8')
-        diagnostic_timer=QTimer(pet);diagnostic_timer.setInterval(2000);diagnostic_timer.timeout.connect(record_visibility);diagnostic_timer.start()
+            key=(state,pos,anim)
+            if last_diag['v'] is not None and (last_diag['v']!=state or last_diag['p']!=pos):
+                import datetime as _dtm
+                with open(str(STATE_ROOT/'app'/'可见性日志.jsonl'),'a',encoding='utf-8') as f:
+                    f.write(json.dumps({'time':_dtm.datetime.now().isoformat(timespec='seconds'),
+                        'from':{'state':last_diag['v'],'pos':last_diag['p'],'anim':last_diag['m']},
+                        'to':{'state':state,'pos':pos,'anim':anim}},ensure_ascii=False)+'\n')
+            last_diag.update(v=state,p=pos,m=anim)
+        diagnostic_timer.timeout.connect(record_visibility);diagnostic_timer.start()
         if '--preview' in sys.argv:
             QTimer.singleShot(500,lambda:pet.grab().save(str(STATE_ROOT/'app/桌宠窗口预览.png')))
             QTimer.singleShot(900,app.quit)

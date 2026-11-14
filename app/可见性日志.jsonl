@@ -1,0 +1,2 @@
+{"time": "2026-11-14T21:53:56", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "working", "autoMoveDisabled": true}
+{"time": "2026-11-14T21:53:57", "from": {"state": [true, false, false], "pos": [1346, 571], "anim": "work02"}, "to": {"state": [true, false, false], "pos": [725, 327], "anim": "work02"}}

@@ -72,11 +72,17 @@ def main():
     if ctypes.get_last_error()==183:return 0
     kernel.CloseHandle.argtypes=[ctypes.c_void_p]
     previous=False
+    misses=0
     state={'pid':os.getpid(),'started':datetime.now().isoformat(timespec='seconds')}
     (ROOT/'app').mkdir(exist_ok=True)
     try:
         while True:
-            current=kimi_is_open()
+            raw=kimi_is_open()
+            # 进程枚举偶尔会瞬间漏读；连续 3 次（约 6 秒）都看不到才算真的消失，
+            # 避免误判"消失→出现"而重复唤起桌宠。
+            if raw:misses=0;current=True
+            else:
+                misses+=1;current=False if misses>=3 else previous
             if current and not previous:
                 try:
                     state.update(lastLaunch=datetime.now().isoformat(timespec='seconds'),petPid=launch_pet())
