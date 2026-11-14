@@ -42,7 +42,7 @@ class Tests(unittest.TestCase):
     def test_deprecated_work_and_mood_idles(self):
         p=self.pet
         self.assertEqual({v['id'] for v in p.regular_work_animations()},{'work01','work02'})
-        self.assertEqual(len(p.mood_idles),12)
+        self.assertEqual(len(p.mood_idles),14)
         self.assertEqual(len(p.extra_idles),4)
         # 心情主导轴让对应站立待机进入 idle 候选
         p.mood.state['axes'].update(joy=8.0,anger=1.0,sorrow=1.0,fear=1.0)

@@ -276,6 +276,38 @@
       "loop": false,
       "line": "害怕得发抖……",
       "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle19",
+      "name": "待机动作19 · 中性·坐姿",
+      "file": "透明WebM/idle19.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        160.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle19.webm",
+      "loop": false,
+      "line": "安静坐一会儿",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "idle20",
+      "name": "待机动作20 · 中性·跪姿",
+      "file": "透明WebM/idle20.webm",
+      "durationMs": 8000,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/idle20.webm",
+      "loop": false,
+      "line": "安静跪坐片刻",
+      "bubble": "由桌宠程序独立显示"
     }
   ],
   "variants": [

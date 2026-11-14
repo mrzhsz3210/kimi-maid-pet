@@ -110,9 +110,9 @@ class Pet(QWidget):
         self.variants=[v for v in self.manifest['variants'] if self.asset_path(v).is_file()]
         self.idles=[self.manifest['idle']]+self.manifest.get('additionalIdleAnimations',[])[:1]
         self.extra_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in ('idle03','idle04','idle05','idle06') and self.asset_path(v).is_file()]
-        # 心情待机：idle07–10 站立（喜怒哀惧）、idle11–14 坐姿、idle15–18 跪姿
+        # 心情待机：idle07–10 站立（喜怒哀惧）、idle11–14 坐姿、idle15–18 跪姿、idle19–20 中性坐/跪
         self.mood_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in
-                         ('idle07','idle08','idle09','idle10','idle11','idle12','idle13','idle14','idle15','idle16','idle17','idle18')
+                         ('idle07','idle08','idle09','idle10','idle11','idle12','idle13','idle14','idle15','idle16','idle17','idle18','idle19','idle20')
                          and self.asset_path(v).is_file()]
         self.next_leisure_group='idle';self.next_leisure_at=time.monotonic()+15.0
         self.cache=OrderedDict();self.pinned_frames={};self.frames=[];self.current=None;self.mode='idle';self.index=0
@@ -463,7 +463,7 @@ class Pet(QWidget):
         if self.extra_idles or self.mood_idles:
             axis=self.mood.dominant_axis()
             poses={'joy':('idle11','idle15'),'anger':('idle12','idle16'),
-                   'sorrow':('idle13','idle17'),'fear':('idle14','idle18')}.get(axis,())
+                   'sorrow':('idle13','idle17'),'fear':('idle14','idle18')}.get(axis,('idle19','idle20'))
             mood_pool=[v for v in self.mood_idles if v['id'] in poses]
             pool=list(self.extra_idles)+mood_pool
             if pool:
