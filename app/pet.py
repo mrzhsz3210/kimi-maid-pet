@@ -741,10 +741,13 @@ class Pet(QWidget):
             self.big5_sliders={}
             for key,desc in traits:
                 label=QLabel(desc,dialog);label.setWordWrap(True);layout.addWidget(label)
+                row3=QHBoxLayout()
+                low=QLabel('低',dialog);high=QLabel('高',dialog)
                 slider=QSlider(Qt.Orientation.Horizontal,dialog);slider.setRange(1,5)
                 slider.setValue(self.mood.big5[key])
                 slider.valueChanged.connect(lambda v,k=key:self.adjust_big5(k,v))
-                layout.addWidget(slider);self.big5_sliders[key]=slider
+                row3.addWidget(low);row3.addWidget(slider,1);row3.addWidget(high);layout.addLayout(row3)
+                self.big5_sliders[key]=slider
             self.mood_dialog=dialog
         self.refresh_mood_panel()
         self.position_size_dialog(reserve=True,dialog=self.mood_dialog)
