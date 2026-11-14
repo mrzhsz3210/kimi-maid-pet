@@ -1048,16 +1048,15 @@ def main():
             while server.hasPendingConnections():
                 connection=server.nextPendingConnection()
                 connection.disconnectFromServer();connection.deleteLater()
-            screen=QApplication.primaryScreen()
-            if screen:
-                area=screen.availableGeometry()
-                pet.move(clamp_position(QPoint(area.center().x()-pet.width()//2,area.center().y()-pet.height()//2),pet.size(),area))
+            # 桌宠已经在桌面上时不要挪动她：重复唤起只负责把隐藏的她请回来。
+            was_hidden=pet.desktop_hidden()
             pet.set_manual_hidden(False)
             if pet.desktop_hidden():return
-            pet.showNormal();pet.show();pet.raise_()
-            if sys.platform=='win32':
-                import ctypes
-                ctypes.windll.user32.ShowWindow(int(pet.winId()),4)
+            if was_hidden:
+                pet.showNormal();pet.show();pet.raise_()
+                if sys.platform=='win32':
+                    import ctypes
+                    ctypes.windll.user32.ShowWindow(int(pet.winId()),4)
         server.newConnection.connect(reveal_existing_pet)
         def record_startup():
             # pythonw can inherit a hidden startup state from a launcher.
