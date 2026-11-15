@@ -71,3 +71,25 @@
 {"time": "2026-11-15T12:36:12", "from": {"state": [true, false, false], "pos": [1168, 284], "anim": "move01right"}, "to": {"state": [true, false, false], "pos": [1178, 278], "anim": "move01right"}}
 {"time": "2026-11-15T12:36:31", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "working", "autoMoveDisabled": false}
 {"time": "2026-11-15T12:36:31", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "working", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:42", "from": {"state": [true, false, false], "pos": [1178, 278], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1105, 232], "anim": "move01left"}}
+{"time": "2026-11-15T12:36:44", "from": {"state": [true, false, false], "pos": [1105, 232], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [1042, 192], "anim": "move01left"}}
+{"time": "2026-11-15T12:36:59", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": true, "manual": true, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": true, "manual": true, "fullscreen": true, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": true, "manual": true, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:59", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:37:14", "from": {"state": [true, false, false], "pos": [1042, 192], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1019, 201], "anim": "move01left"}}
+{"time": "2026-11-15T12:37:16", "from": {"state": [true, false, false], "pos": [1019, 201], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [909, 243], "anim": "move01left"}}
+{"time": "2026-11-15T12:37:18", "from": {"state": [true, false, false], "pos": [909, 243], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [891, 250], "anim": "move01left"}}
+{"time": "2026-11-15T12:37:25", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "movement", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:37:25", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "movement", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:37:52", "from": {"state": [true, false, false], "pos": [891, 250], "anim": "move02"}, "to": {"state": [true, false, false], "pos": [945, 230], "anim": "move02"}}
+{"time": "2026-11-15T12:37:54", "from": {"state": [true, false, false], "pos": [945, 230], "anim": "move02"}, "to": {"state": [true, false, false], "pos": [1154, 151], "anim": "move02"}}
+{"time": "2026-11-15T12:37:56", "from": {"state": [true, false, false], "pos": [1154, 151], "anim": "move02"}, "to": {"state": [true, false, false], "pos": [1268, 109], "anim": "move02"}}
+{"time": "2026-11-15T12:39:22", "from": {"state": [true, false, false], "pos": [1268, 109], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1408, 203], "anim": "landing"}}
