@@ -52,6 +52,19 @@ class Tests(unittest.TestCase):
             p.idle()
             self.assertEqual(p.current['id'],'idle07')
         p.mood.state['axes'].update(joy=p.mood.joy_baseline());p.mood.state['updatedAt']=time.time()
+    def test_appearance_switch_reload(self):
+        p=self.pet
+        original=p.appearance
+        try:
+            p.set_appearance('白丝')
+            self.assertEqual(p.appearance,'白丝')
+            self.assertIn('白丝',str(p.asset_root()))
+            self.assertEqual(p.manifest['character'],'Kimi娘')
+            self.assertEqual(len(p.variants),16)
+            key=str(p.asset_path(p.idles[0]))
+            self.assertIn(key,p.pinned_frames)
+        finally:
+            p.set_appearance(original)
     def test_menu_contains_all_variants_and_exit(self):
         actions=[]
         def inspect():
@@ -59,7 +72,7 @@ class Tests(unittest.TestCase):
             actions.extend(a.text() for a in menu.actions() if not a.isSeparator());menu.close()
         QTimer.singleShot(100,inspect)
         QTest.mouseClick(self.pet,Qt.MouseButton.RightButton,pos=QPoint(160,160))
-        self.assertEqual(actions,['隐藏桌宠','全屏时自动隐藏','打开对话模式','查看历史对话','对话框大小…','她此刻的心情…','编辑人设…','互动差分动画','工作差分动画','待机差分动画','移动差分','禁用自移动','桌宠大小…','禁用音效','退出桌宠'])
+        self.assertEqual(actions,['隐藏桌宠','全屏时自动隐藏','打开对话模式','查看历史对话','对话框大小…','她此刻的心情…','编辑人设…','互动差分动画','工作差分动画','待机差分动画','移动差分','禁用自移动','外观（丝袜）','桌宠大小…','禁用音效','退出桌宠'])
         self.assertEqual(actions[-1],'退出桌宠')
     def test_drag_landing_and_click_suppression(self):
         from types import SimpleNamespace

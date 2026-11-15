@@ -8,6 +8,14 @@ def covers_monitor(window, monitor, tolerance=2):
             and window[2] >= monitor[2]-tolerance and window[3] >= monitor[3]-tolerance)
 
 
+def is_fullscreen_window(window, monitor, style=0, tolerance=2):
+    """Borderless coverage only; captioned (normal) windows never count."""
+    WS_CAPTION = 0x00C00000
+    if style & WS_CAPTION:
+        return False
+    return covers_monitor(window, monitor, tolerance)
+
+
 class FullscreenDetector:
     def __init__(self):
         self.user32 = None
@@ -49,6 +57,16 @@ class FullscreenDetector:
         u.GetClassNameW(hwnd, name, len(name))
         if name.value in ('Progman', 'WorkerW', 'Shell_TrayWnd', 'Shell_SecondaryTrayWnd'):
             return False
+        # A maximized normal window can cover the whole monitor (especially with
+        # an auto-hiding taskbar) but is not fullscreen: it keeps its caption.
+        GWL_STYLE = -16
+        WS_CAPTION = 0x00C00000
+        try:
+            style = u.GetWindowLongW(hwnd, GWL_STYLE)
+            if style & WS_CAPTION:
+                return False
+        except OSError:
+            pass
         rect, info = w.RECT(), self.MonitorInfo()
         info.cbSize = c.sizeof(info)
         if not u.GetWindowRect(hwnd, c.byref(rect)) or not u.GetMonitorInfoW(u.MonitorFromWindow(hwnd, 2), c.byref(info)):
@@ -60,6 +78,7 @@ class FullscreenDetector:
             pass
         m = info.rcMonitor
         covered = covers_monitor((rect.left,rect.top,rect.right,rect.bottom), (m.left,m.top,m.right,m.bottom))
+        # 到达这里说明窗口没有标题栏（全屏应用）；最大化普通窗口已在上方被排除。
         if covered:
             self.last_culprit = {'class': name.value, 'pid': pid.value,
                                  'rect': [rect.left, rect.top, rect.right, rect.bottom]}

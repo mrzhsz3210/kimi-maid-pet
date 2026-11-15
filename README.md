@@ -43,6 +43,10 @@ python app/pet.py --self-test   # 离线自检
 
 想换角色：替换 webm 并改清单即可，不用改代码。新增互动差分就往 `variants` 数组里加一条（参考 `knockback` 段）。
 
+### 双外观（黑丝 / 白丝）
+
+右键菜单 →「外观（丝袜）」可在黑丝与白丝两套外观间热切换（无需重启）。白丝素材在 `outputs/Kimi娘桌宠素材-白丝/`（结构与原素材一致，按 crf32 重压缩以控制体积）。新增一套外观：复制素材文件夹并在 `pet.py` 的 `APPEARANCES` 里登记即可。
+
 ## 版权与许可说明
 
 - 本仓库程序部分衍生自 [@jingh12312-rgb](https://github.com/jingh12312-rgb) 的 [bailong-desktop-pet](https://github.com/jingh12312-rgb/bailong-desktop-pet)，**已获得原作者授权发布**。上游的「白龙娘」美术素材不包含在本仓库中，其许可见上游 ASSETS.md。

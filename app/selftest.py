@@ -56,7 +56,7 @@ def run(root):
             chat.toggle();app.processEvents()
             assert chat.composer.y()==pet.y()+pet.height()+8
             menu=pet.context_menu()
-            assert [a.text() for a in menu.actions() if a.menu()]==['互动差分动画','工作差分动画','待机差分动画','移动差分']
+            assert [a.text() for a in menu.actions() if a.menu()]==['互动差分动画','工作差分动画','待机差分动画','移动差分','外观（丝袜）']
             conversation=chat.store.new(folder)
             turn={'prompt':'离线界面检查','created':'selftest','status':'running','output':'','events':[]}
             conversation['turns'].append(turn);chat.active=conversation;chat.running_chat=conversation;chat.running_turn=turn

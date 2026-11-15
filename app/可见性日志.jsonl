@@ -27,3 +27,47 @@
 {"time": "2026-11-14T22:53:37", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "working", "autoMoveDisabled": true}
 {"time": "2026-11-14T23:55:14", "from": {"state": [true, false, false], "pos": [1175, 475], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1239, 436], "anim": "drag"}}
 {"time": "2026-11-14T23:55:16", "from": {"state": [true, false, false], "pos": [1239, 436], "anim": "drag"}, "to": {"state": [true, false, false], "pos": [1326, 366], "anim": "idle"}}
+{"time": "2026-11-15T09:23:20", "from": {"state": [true, false, false], "pos": [1346, 571], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1124, 514], "anim": "move02left"}}
+{"time": "2026-11-15T09:23:22", "from": {"state": [true, false, false], "pos": [1124, 514], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [996, 481], "anim": "move02left"}}
+{"time": "2026-11-15T09:23:32", "from": {"state": [true, false, false], "pos": [996, 481], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1032, 473], "anim": "drag"}}
+{"time": "2026-11-15T09:23:34", "from": {"state": [true, false, false], "pos": [1032, 473], "anim": "drag"}, "to": {"state": [true, false, false], "pos": [1397, 292], "anim": "landing"}}
+{"time": "2026-11-15T09:24:20", "from": {"state": [true, false, false], "pos": [1397, 292], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1451, 312], "anim": "idle"}}
+{"time": "2026-11-15T09:26:06", "hidden": true, "manual": false, "fullscreen": true, "culprit": {"class": "UnityWndClass", "pid": 26876, "rect": [0, 0, 2560, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T09:26:08", "from": {"state": [true, false, false], "pos": [1451, 312], "anim": "idle"}, "to": {"state": [false, false, true], "pos": [1451, 312], "anim": "idle"}}
+{"time": "2026-11-15T09:32:54", "hidden": false, "manual": false, "fullscreen": false, "culprit": {"class": "UnityWndClass", "pid": 26876, "rect": [0, 0, 2560, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T09:32:56", "from": {"state": [false, false, true], "pos": [1451, 312], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1451, 312], "anim": "idle"}}
+{"time": "2026-11-15T10:40:36", "from": {"state": [true, false, false], "pos": [1451, 312], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1451, 69], "anim": "drag"}}
+{"time": "2026-11-15T10:40:38", "from": {"state": [true, false, false], "pos": [1451, 69], "anim": "drag"}, "to": {"state": [true, false, false], "pos": [1451, 63], "anim": "idle"}}
+{"time": "2026-11-15T10:42:28", "from": {"state": [true, false, false], "pos": [1451, 63], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1451, 231], "anim": "idle"}}
+{"time": "2026-11-15T10:46:00", "hidden": true, "manual": false, "fullscreen": true, "culprit": {"class": "Qt51514QWindowIcon", "pid": 22456, "rect": [0, 0, 2561, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T10:46:01", "from": {"state": [true, false, false], "pos": [1451, 231], "anim": "idle"}, "to": {"state": [false, false, true], "pos": [1451, 231], "anim": "idle2"}}
+{"time": "2026-11-15T10:46:04", "hidden": false, "manual": false, "fullscreen": false, "culprit": {"class": "Qt51514QWindowIcon", "pid": 22456, "rect": [0, 0, 2561, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T10:46:05", "from": {"state": [false, false, true], "pos": [1451, 231], "anim": "idle2"}, "to": {"state": [true, false, false], "pos": [1451, 231], "anim": "idle2"}}
+{"time": "2026-11-15T11:54:09", "from": {"state": [true, false, false], "pos": [1451, 231], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1451, 656], "anim": "idle"}}
+{"time": "2026-11-15T11:56:00", "hidden": true, "manual": false, "fullscreen": true, "culprit": {"class": "Qt51514QWindowIcon", "pid": 22456, "rect": [0, 0, 2561, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T11:56:01", "from": {"state": [true, false, false], "pos": [1451, 656], "anim": "idle2"}, "to": {"state": [false, false, true], "pos": [1451, 656], "anim": "idle2"}}
+{"time": "2026-11-15T11:56:02", "hidden": false, "manual": false, "fullscreen": false, "culprit": {"class": "Qt51514QWindowIcon", "pid": 22456, "rect": [0, 0, 2561, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T11:56:03", "from": {"state": [false, false, true], "pos": [1451, 656], "anim": "idle2"}, "to": {"state": [true, false, false], "pos": [1451, 656], "anim": "idle2"}}
+{"time": "2026-11-15T12:02:46", "hidden": true, "manual": false, "fullscreen": true, "culprit": {"class": "Chrome_WidgetWin_1", "pid": 30496, "rect": [0, 0, 2560, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:02:47", "from": {"state": [true, false, false], "pos": [1451, 656], "anim": "idle"}, "to": {"state": [false, false, true], "pos": [1451, 656], "anim": "idle"}}
+{"time": "2026-11-15T12:02:49", "hidden": false, "manual": false, "fullscreen": false, "culprit": {"class": "Chrome_WidgetWin_1", "pid": 30496, "rect": [0, 0, 2560, 1440]}, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:02:49", "from": {"state": [false, false, true], "pos": [1451, 656], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1451, 656], "anim": "idle"}}
+{"time": "2026-11-15T12:17:13", "from": {"state": [true, false, false], "pos": [1451, 656], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1314, 550], "anim": "move02left"}}
+{"time": "2026-11-15T12:17:15", "from": {"state": [true, false, false], "pos": [1314, 550], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1242, 494], "anim": "move02left"}}
+{"time": "2026-11-15T12:17:33", "from": {"state": [true, false, false], "pos": [1242, 494], "anim": "idle19"}, "to": {"state": [true, false, false], "pos": [1359, 427], "anim": "drag"}}
+{"time": "2026-11-15T12:17:35", "from": {"state": [true, false, false], "pos": [1359, 427], "anim": "drag"}, "to": {"state": [true, false, false], "pos": [1365, 424], "anim": "idle"}}
+{"time": "2026-11-15T12:18:11", "from": {"state": [true, false, false], "pos": [1365, 424], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1354, 428], "anim": "move02left"}}
+{"time": "2026-11-15T12:18:13", "from": {"state": [true, false, false], "pos": [1354, 428], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1182, 483], "anim": "move02left"}}
+{"time": "2026-11-15T12:18:15", "from": {"state": [true, false, false], "pos": [1182, 483], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1105, 508], "anim": "move02left"}}
+{"time": "2026-11-15T12:19:10", "from": {"state": [true, false, false], "pos": [1105, 508], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [1054, 489], "anim": "work02"}}
+{"time": "2026-11-15T12:30:29", "from": {"state": [true, false, false], "pos": [1054, 489], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1052, 491], "anim": "move02left"}}
+{"time": "2026-11-15T12:30:31", "from": {"state": [true, false, false], "pos": [1052, 491], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [946, 589], "anim": "move02left"}}
+{"time": "2026-11-15T12:30:33", "from": {"state": [true, false, false], "pos": [946, 589], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [895, 636], "anim": "move02left"}}
+{"time": "2026-11-15T12:31:03", "from": {"state": [true, false, false], "pos": [895, 636], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1382, 379], "anim": "landing"}}
+{"time": "2026-11-15T12:35:40", "from": {"state": [true, false, false], "pos": [1346, 571], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1179, 434], "anim": "move02left"}}
+{"time": "2026-11-15T12:35:42", "from": {"state": [true, false, false], "pos": [1179, 434], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1069, 345], "anim": "move02left"}}
+{"time": "2026-11-15T12:36:08", "from": {"state": [true, false, false], "pos": [1069, 345], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1081, 338], "anim": "move01right"}}
+{"time": "2026-11-15T12:36:10", "from": {"state": [true, false, false], "pos": [1081, 338], "anim": "move01right"}, "to": {"state": [true, false, false], "pos": [1168, 284], "anim": "move01right"}}
+{"time": "2026-11-15T12:36:12", "from": {"state": [true, false, false], "pos": [1168, 284], "anim": "move01right"}, "to": {"state": [true, false, false], "pos": [1178, 278], "anim": "move01right"}}
+{"time": "2026-11-15T12:36:31", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "working", "autoMoveDisabled": false}
+{"time": "2026-11-15T12:36:31", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "working", "autoMoveDisabled": false}

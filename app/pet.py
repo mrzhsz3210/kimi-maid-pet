@@ -15,6 +15,7 @@ from platform_support import resource_root,state_root,configure_mac_window,user_
 ROOT=resource_root()
 STATE_ROOT=state_root()
 ASSETS=ROOT/'outputs/Kimi娘桌宠素材'
+APPEARANCES={'黑丝':'Kimi娘桌宠素材','白丝':'Kimi娘桌宠素材-白丝'}
 FLAGS=Qt.WindowType.FramelessWindowHint|Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.Tool
 
 def clamp_position(position,size,area):
@@ -106,7 +107,10 @@ class Pet(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setWindowTitle('Kimi娘桌宠');self.setFixedSize(256,256)
-        self.manifest=json.loads((ASSETS/'素材清单.json').read_text(encoding='utf-8'))
+        self.settings=QSettings('KimiMaidPet','DesktopPet')
+        self.appearance=self.settings.value('appearance','黑丝')
+        if self.appearance not in APPEARANCES:self.appearance='黑丝'
+        self.manifest=json.loads((self.asset_root()/'素材清单.json').read_text(encoding='utf-8'))
         self.variants=[v for v in self.manifest['variants'] if self.asset_path(v).is_file()]
         self.idles=[self.manifest['idle']]+self.manifest.get('additionalIdleAnimations',[])[:1]
         self.extra_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in ('idle03','idle04','idle05','idle06') and self.asset_path(v).is_file()]
@@ -124,7 +128,6 @@ class Pet(QWidget):
         self.chat=None
         self.task_active=False
         self.manual_hidden=False;self.fullscreen_hidden=False;self.hidden_since=None
-        self.settings=QSettings('KimiMaidPet','DesktopPet')
         self.mood=MoodService(user_data())
         self.bubble_percent=max(50,min(150,self.settings.value('bubblePercent',100,type=int)))
         self.task_bubbles_disabled=self.settings.value('taskBubblesDisabled',False,type=bool)
@@ -396,9 +399,44 @@ class Pet(QWidget):
     def moveEvent(self,event):
         super().moveEvent(event)
         if getattr(self,'chat',None):self.chat.position()
+    def asset_root(self):
+        folder=APPEARANCES.get(self.appearance,'Kimi娘桌宠素材')
+        root=ROOT/'outputs'/folder
+        return root if root.is_dir() else ASSETS
+    def set_appearance(self,name):
+        if name==self.appearance or name not in APPEARANCES:return
+        self.note_interaction()
+        self.appearance=name;self.settings.setValue('appearance',name)
+        self.reload_assets()
+        self.say('主人，我换好'+name+'啦。好看吗？',5000)
+    def reload_assets(self):
+        self.manifest=json.loads((self.asset_root()/'素材清单.json').read_text(encoding='utf-8'))
+        self.variants=[v for v in self.manifest['variants'] if self.asset_path(v).is_file()]
+        self.idles=[self.manifest['idle']]+self.manifest.get('additionalIdleAnimations',[])[:1]
+        self.extra_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in ('idle03','idle04','idle05','idle06') and self.asset_path(v).is_file()]
+        self.mood_idles=[v for v in self.manifest.get('additionalIdleAnimations',[]) if v.get('id') in
+                         ('idle07','idle08','idle09','idle10','idle11','idle12','idle13','idle14','idle15','idle16','idle17','idle18','idle19','idle20')
+                         and self.asset_path(v).is_file()]
+        self.work_slots=self.manifest.get('workAnimations',[])[:6]
+        self.movement_slots=[v for v in self.manifest.get('movementAnimations',[]) if v and not v.get('deprecated') and self.asset_path(v).is_file()]
+        self.movement_all=[v for v in self.manifest.get('movementAnimations',[]) if v and self.asset_path(v).is_file()]
+        self.pinned_frames={};self.cache.clear();self.frames=[]
+        items=self.idles+self.extra_idles+self.mood_idles+self.variants+self.movement_slots+[v for v in self.work_slots if v and self.asset_path(v).is_file()]+[self.manifest[name] for name in ('dragAnimation','landingAnimation') if self.manifest.get(name)]
+        items += [self.return_transition_item(v) for v in self.variants if v.get('returnTransition')]
+        progress=None
+        if QApplication.platformName()!='offscreen':
+            progress=QProgressDialog('主人，等我打开衣柜换'+self.appearance+'…','',0,len(items))
+            progress.setCancelButton(None);progress.setWindowTitle('Kimi娘桌宠');progress.setMinimumDuration(0);progress.show()
+        for i,item in enumerate(items):
+            key=str(self.asset_path(item));self.pinned_frames[key]=self.load(item)
+            if progress:progress.setValue(i+1);QApplication.processEvents()
+        if progress:progress.close()
+        icon=QIcon(self.pinned_frames[str(self.asset_path(self.idles[0]))][0])
+        self.setWindowIcon(icon);self.tray.setIcon(icon)
+        self.idle()
     def asset_path(self,item):
         # Optional playbackFile allows future formats without changing the manifest's video source.
-        return ASSETS/(item.get('playbackFile') or item['file'].replace('.webm','.webp'))
+        return self.asset_root()/(item.get('playbackFile') or item['file'].replace('.webm','.webp'))
     def load(self,item):
         path=self.asset_path(item);key=str(path)
         if key in self.pinned_frames:return self.pinned_frames[key]
@@ -701,8 +739,15 @@ class Pet(QWidget):
         movement_switch=menu.addAction('禁用自移动');movement_switch.setCheckable(True)
         movement_switch.setChecked(self.auto_movement_disabled)
         movement_switch.toggled.connect(self.set_auto_movement_disabled)
+        looks=None
+        if (ROOT/'outputs/Kimi娘桌宠素材-白丝').is_dir():
+            looks=QMenu('外观（丝袜）',menu);menu.addMenu(looks)
+            for name in ('黑丝','白丝'):
+                action=looks.addAction(name)
+                action.setCheckable(True);action.setChecked(self.appearance==name)
+                action.triggered.connect(lambda checked=False,n=name:self.set_appearance(n))
         # Keep Python wrappers alive as well as Qt's native ownership tree.
-        menu._submenus=(interaction,work,idle,movement)
+        menu._submenus=(interaction,work,idle,movement,looks)
         menu.addSeparator();menu.addAction('桌宠大小…',self.show_size_dialog)
         muted=menu.addAction('禁用音效');muted.setCheckable(True)
         muted.setChecked(self.sound_disabled);muted.toggled.connect(self.set_sound_disabled)
