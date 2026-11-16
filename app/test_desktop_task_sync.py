@@ -36,6 +36,7 @@ class WatcherSyncTests(unittest.TestCase):
         base=int(self.now[0]*1000)
         write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason=None,lastPrompt='帮我修问题',updatedAt=base)
         self.sync.poll()
+        self.pet.task_started.assert_called_once()
         write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason=None,lastPrompt='帮我修问题',updatedAt=base+9000)
         self.sync.poll()
         self.pet.task_started.assert_called_once()

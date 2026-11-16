@@ -130,11 +130,11 @@ class TaskWorker(QThread):
     failed = Signal(str, bool)
     request = Signal(str, object)
 
-    def __init__(self, cwd, thread_id, prompt, parent=None, mode='work', session=None, mood=None):
+    def __init__(self, cwd, thread_id, prompt, parent=None, mode='work', session=None, mood=None, pet_name='Kimi娘', allow_web=False):
         super().__init__(parent)
         self.cancel = threading.Event();self.responses=queue.Queue()
         self.cwd, self.thread_id, self.prompt = cwd, thread_id, prompt
-        self.mode=mode;self.session=session;self.mood=mood
+        self.mode=mode;self.session=session;self.mood=mood;self.pet_name=pet_name;self.allow_web=allow_web
 
     def ask(self, method, params):
         self.request.emit(method, params)
@@ -144,9 +144,9 @@ class TaskWorker(QThread):
         raise TaskCancelled('主人，我先停下来啦。')
 
     def run(self):
-        session=self.session or KimiSession(self.cwd,self.thread_id,self.cancel,self.event.emit,self.ask,mode=self.mode,mood=self.mood)
+        session=self.session or KimiSession(self.cwd,self.thread_id,self.cancel,self.event.emit,self.ask,mode=self.mode,mood=self.mood,pet_name=self.pet_name,allow_web=self.allow_web)
         self.session=session
-        session.cancel=self.cancel;session.emit=self.event.emit;session.ask=self.ask;session.mood=self.mood
+        session.cancel=self.cancel;session.emit=self.event.emit;session.ask=self.ask;session.mood=self.mood;session.pet_name=self.pet_name;session.allow_web=self.allow_web
         try:self.ready.emit(session.run(self.prompt))
         except TaskCancelled as error:session.close();self.failed.emit(str(error), True)
         except Exception as error:session.close();self.failed.emit(str(error), False)
@@ -157,7 +157,9 @@ class ChatController(QObject):
         super().__init__(pet)
         self.pet=pet;self.store=HistoryStore(directory)
         self.composer=Composer();self.window=ChatWindow()
+        self.composer.setWindowTitle(pet.pet_name+' · 对话模式')
         self.active=None;self.running_chat=None;self.running_turn=None;self.worker=None
+        self.running_source='text'
         self.approval_dialog=None;self.enabled=False;self.closing=False
         self.dirty=False;self.save_error_shown=False
         self.default_cwd=self.store.directory/'任务文件'
@@ -221,6 +223,11 @@ class ChatController(QObject):
         self.refresh_list();self.window.editor.clear();self.composer.editor.clear()
         self.composer.status.setText('主人，新对话准备好啦。')
 
+    def apply_pet_name(self,name):
+        self.composer.setWindowTitle(name+' · 对话模式')
+        if self.worker and not self.worker.isRunning() and getattr(self.worker,'session',None):
+            self.worker.session.close()
+
     def choose_folder(self):
         if self.busy:return
         folder=QFileDialog.getExistingDirectory(self.window if self.window.isVisible() else self.composer,'选择任务文件夹',str(self.active['cwd'] if self.active else self.default_cwd))
@@ -229,32 +236,36 @@ class ChatController(QObject):
             self.active=self.store.new(folder);self.refresh_list()
             self.composer.folder_button.setToolTip(folder)
 
-    def submit(self, prompt):
+    def submit(self, prompt, mode='work', source='text'):
         if self.busy or self.closing:return
+        if mode not in ('work','chat'):raise ValueError('未知对话模式：'+mode)
         from quota import find_kimi
         try:
             find_kimi()
-            if self.active is None:self.active=self.store.new(self.default_cwd)
+            if self.active is None or self.active.get('mode','work')!=mode:
+                self.active=self.store.new(self.default_cwd,mode=mode)
             Path(self.active['cwd']).mkdir(parents=True,exist_ok=True)
         except Exception as error:
+            if self.pet.voice:self.pet.voice.set_busy(False)
             self.pet.say('唔，主人，我暂时没能连上Kimi：'+str(error),10000);return
         if self.worker and self.worker.isRunning():return
         turn={'prompt':prompt,'created':HistoryStore.now(),'status':'running','output':'','result':'','events':[]}
         self.active['turns'].append(turn)
         if len(self.active['turns'])==1:self.active['title']=prompt.replace('\n',' ')[:28]
-        self.running_chat=self.active;self.running_turn=turn
+        self.running_chat=self.active;self.running_turn=turn;self.running_source=source
         self.dirty=True;self.flush();self.refresh_list()
         self.composer.editor.clear();self.window.editor.clear()
         self.composer.busy(True);self.window.busy(True)
-        self.pet.task_started()
-        if not self.pet.task_bubbles_disabled:
+        self.pet.task_started(source=source,prompt=prompt)
+        if self.pet.voice:self.pet.voice.set_busy(True)
+        if source!='voice' and not self.pet.task_bubbles_disabled:
             self.pet.say('主人，我收到啦！这就认真帮你处理。',4000)
             self.pet.bubble.is_task_bubble=True
         previous=getattr(self.worker,'session',None) if self.worker else None
-        mode='work'
-        if previous and (previous.thread_id!=self.active.get('threadId') or previous.mode!=mode):previous.close();previous=None
+        allow_web=source=='voice'
+        if previous and (previous.thread_id!=self.active.get('threadId') or previous.mode!=mode or previous.allow_web!=allow_web):previous.close();previous=None
         mood=self.pet.mood if self.pet.settings.value('moodSolicit',True,type=bool) else None
-        self.worker=TaskWorker(self.active['cwd'],self.active.get('threadId'),prompt,self,mode=mode,session=previous,mood=mood)
+        self.worker=TaskWorker(self.active['cwd'],self.active.get('threadId'),prompt,self,mode=mode,session=previous,mood=mood,pet_name=self.pet.pet_name,allow_web=allow_web)
         self.worker.event.connect(self.receive);self.worker.ready.connect(self.completed);self.worker.failed.connect(self.failed)
         self.worker.request.connect(self.request);self.worker.start()
 
@@ -272,12 +283,15 @@ class ChatController(QObject):
         elif kind=='progress':
             events=self.running_turn['events'];events.append(str(value));self.running_turn['events']=events[-250:]
             self.latest_preview_kind='progress'
-            if not self.preview_timer.isActive():self.preview_timer.start()
+            if self.running_source=='voice':
+                status='正在联网查询…' if str(value).startswith('正在执行：') else '正在整理回答…'
+                self.pet.voice_status(self.running_turn['prompt'],status)
+            elif not self.preview_timer.isActive():self.preview_timer.start()
         self.dirty=True
         if not self.render_timer.isActive():self.render_timer.start()
 
     def preview_reply(self):
-        if not self.running_turn:return
+        if not self.running_turn or self.running_source=='voice':return
         kind=self.latest_preview_kind
         if kind=='summary':
             text=self.running_turn.get('summary','');title='主人，我正在理清思路…（公开摘要）'
@@ -293,6 +307,7 @@ class ChatController(QObject):
         self.preview_timer.stop()
         self.pet.task_finished()
         self.running_turn=None;self.running_chat=None
+        if self.pet.voice and self.running_source!='voice':self.pet.voice.set_busy(False)
         self.composer.busy(False);self.window.busy(False)
         self.dirty=True;self.flush();self.render()
 
@@ -303,7 +318,10 @@ class ChatController(QObject):
         self.running_chat['threadId']=result['threadId']
         record_task_outcome(self.store.directory,'pet','completed')
         self.finish()
-        self.pet.task_completed(result['text'],lambda:self.open_history(chat['id']))
+        if self.running_source=='voice':
+            self.pet.voice_completed(result['text'],lambda:self.open_history(chat['id']))
+            if self.pet.voice:self.pet.voice.begin_followup()
+        else:self.pet.task_completed(result['text'],lambda:self.open_history(chat['id']))
 
     def failed(self, error, cancelled):
         if not self.running_turn:return
@@ -311,8 +329,10 @@ class ChatController(QObject):
         self.running_turn.update(status='interrupted' if cancelled else 'failed',error=error)
         record_task_outcome(self.store.directory,'pet','interrupted' if cancelled else 'failed')
         self.finish()
+        if self.running_source=='voice' and self.pet.voice:self.pet.voice.set_busy(False)
         if not cancelled:self.pet.task_failed()
-        self.pet.task_result('主人，我先停下来啦。' if cancelled else '唔，主人，这次遇到一点困难，还没有完成。',error,lambda:self.open_history(chat['id']))
+        title=self.pet.pet_name+' · 回答中断' if self.running_source=='voice' else ('主人，我先停下来啦。' if cancelled else '唔，主人，这次遇到一点困难，还没有完成。')
+        self.pet.task_result(title,error,lambda:self.open_history(chat['id']))
 
     def stop(self):
         if self.worker and self.worker.isRunning():

@@ -108,6 +108,8 @@ class Pet(QWidget):
         self.setAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating)
         self.setWindowTitle('Kimi娘桌宠');self.setFixedSize(256,256)
         self.settings=QSettings('KimiMaidPet','DesktopPet')
+        self.pet_name=self.settings.value('petName','没药')
+        self.setWindowTitle(self.pet_name+'桌宠')
         self.appearance=self.settings.value('appearance','黑丝')
         if self.appearance not in APPEARANCES:self.appearance='黑丝'
         self.manifest=json.loads((self.asset_root()/'素材清单.json').read_text(encoding='utf-8'))
@@ -120,12 +122,14 @@ class Pet(QWidget):
                          and self.asset_path(v).is_file()]
         self.next_leisure_group='idle';self.next_leisure_at=time.monotonic()+15.0
         self.cache=OrderedDict();self.pinned_frames={};self.frames=[];self.current=None;self.mode='idle';self.index=0
+        self.listening=False
         self.frame_size=min(512,max(256,round(256*max(s.devicePixelRatio() for s in QApplication.screens()))))
         self.transition=None
         self.bubble=Bubble();self.generation=0;self.dragging=False;self.last_click=None
         self.click_streak=0;self.click_streak_at=0.0
         self.bubble.dismiss_requested.connect(self.dismiss_bubble)
         self.chat=None
+        self.voice=None
         self.task_active=False
         self.manual_hidden=False;self.fullscreen_hidden=False;self.hidden_since=None
         self.mood=MoodService(user_data())
@@ -187,6 +191,8 @@ class Pet(QWidget):
         from desktop_task_sync import DesktopTaskSync
         self.desktop_sync=DesktopTaskSync(self)
         if QApplication.platformName()!='offscreen':QTimer.singleShot(1500,self.desktop_sync.start)
+        if self.settings.value('voiceEnabled',False,type=bool) and QApplication.platformName()!='offscreen':
+            QTimer.singleShot(2000,self.start_voice)
     def reassert_window(self):
         if self.desktop_hidden():return
         import ctypes
@@ -236,7 +242,7 @@ class Pet(QWidget):
         now=time.monotonic() if now is None else now
         return (not self.dock_edge and not self.auto_movement_disabled and bool(self.movement_slots) and now-self.last_interaction>=15.0
                 and now>=self.movement_ready_at and not self.desktop_hidden()
-                and not self.task_active and not self.dragging
+                and not self.task_active and not self.dragging and not self.listening
                 and not self.pointer_down and not self.click_timer.isActive()
                   and not (getattr(self,'size_dialog',None) and self.size_dialog.isVisible())
                   and not (getattr(self,'bubble_settings_dialog',None) and self.bubble_settings_dialog.isVisible())
@@ -494,6 +500,8 @@ class Pet(QWidget):
     def play(self,item,mode):
         if self.dock_edge and mode!='idle':return
         if self.movement_plan is not None:self.finish_movement()
+        # 主动切到非聆听动作时退出聆听状态
+        if mode!='listen':self.listening=False
         self.frames=self.load(item);self.current=item;self.mode=mode;self.index=0;self.started=time.monotonic();self.update_frame()
         if getattr(self,'hidden_since',None) is not None:self.hidden_since=self.started
         self.transition=None
@@ -518,14 +526,15 @@ class Pet(QWidget):
         standing={'joy':'idle07','anger':'idle08','sorrow':'idle09','fear':'idle10'}.get(axis)
         mood_idle=next((v for v in self.mood_idles if v['id']==standing),None) if standing else None
         if mood_idle:
-            item=random.choices([mood_idle]+self.idles,weights=[3,3,1][:1+len(self.idles)])[0]
+            neutral_weights=[4,1][:len(self.idles)];scale=7.0/sum(neutral_weights)
+            item=random.choices([mood_idle]+self.idles,weights=[3.0]+[weight*scale for weight in neutral_weights])[0]
         else:
             item=random.choices(self.idles,weights=[4,1][:len(self.idles)])[0]
         self.play(item,'idle')
     def try_leisure(self):
         now=time.monotonic()
         if (now<self.next_leisure_at or now-self.last_interaction<15 or self.dock_edge
-                or self.desktop_hidden() or self.task_active or self.dragging
+                or self.desktop_hidden() or self.task_active or self.dragging or self.listening
                 or self.pointer_down or self.click_timer.isActive() or QApplication.activePopupWidget() is not None
                 or any(getattr(self,n,None) and getattr(self,n).isVisible() for n in ('size_dialog','bubble_settings_dialog'))):return False
         if self.next_leisure_group=='movement' and self.movement_allowed(now):
@@ -536,11 +545,19 @@ class Pet(QWidget):
         if self.extra_idles or self.mood_idles:
             axis=self.mood.dominant_axis()
             poses={'joy':('idle11','idle15'),'anger':('idle12','idle16'),
-                   'sorrow':('idle13','idle17'),'fear':('idle14','idle18')}.get(axis,('idle19','idle20'))
-            mood_pool=[v for v in self.mood_idles if v['id'] in poses]
-            pool=list(self.extra_idles)+mood_pool
+                   'sorrow':('idle13','idle17'),'fear':('idle14','idle18')}.get(axis,())
+            emotional=[v for v in self.mood_idles if v['id'] in poses]
+            neutral=[v for v in self.mood_idles if v['id'] in ('idle19','idle20')]
+            pool=list(self.extra_idles)+emotional+neutral
             if pool:
-                weights=[1.0]*len(self.extra_idles)+[2.5]*len(mood_pool)
+                neutral_weights=[1.0]*len(self.extra_idles)+[1.25]*len(neutral)
+                if emotional and neutral_weights:
+                    scale=7.0/sum(neutral_weights)
+                    weights=[weight*scale for weight in neutral_weights[:len(self.extra_idles)]]
+                    weights += [3.0/len(emotional)]*len(emotional)
+                    weights += [weight*scale for weight in neutral_weights[len(self.extra_idles):]]
+                else:
+                    weights=[1.0]*len(self.extra_idles)+[2.5]*len(emotional)+[1.25]*len(neutral)
                 self.play(random.choices(pool,weights=weights)[0],'leisure')
                 self.next_leisure_group='movement' if not self.auto_movement_disabled else 'idle'
                 self.next_leisure_at=now+15;return True
@@ -548,17 +565,25 @@ class Pet(QWidget):
     def regular_work_animations(self):
         # 废弃段与 work06（报错专用）不进工作轮换。
         return [v for v in self.work_slots if v and not v.get('deprecated') and v['id']!='work06' and self.asset_path(v).is_file()]
-    def task_started(self):
+    def thinking_animation(self):
+        item=next((v for v in self.variants if v.get('id')=='thinking'),None)
+        work=self.regular_work_animations()
+        return item or (work[0] if work else self.idles[0])
+    def task_started(self,source='text',prompt=''):
+        self.end_voice_listening()
         self.note_interaction()
         self.task_active=True
         self.last_task_group=None
         self.click_timer.stop();self.last_click=None
+        if source=='voice':
+            if not self.dock_edge:self.play(self.thinking_animation(),'thinking')
+            self.voice_status(prompt,'正在思考，稍等一下…');return
         work=self.regular_work_animations()
         if work and not self.dock_edge:self.play(random.choice(work),'working')
         else:self.idle()
     def task_finished(self):
         self.task_active=False
-        if self.mode in ('work-start','working','idle'):self.idle()
+        if self.mode in ('work-start','working','thinking','idle'):self.idle()
     def task_failed(self):
         self.task_active=False
         failure=next((v for v in self.work_slots if v and v['id']=='work06' and self.asset_path(v).is_file()),None)
@@ -584,6 +609,11 @@ class Pet(QWidget):
         if elapsed>=duration:
             if self.mode=='movement':self.finish_movement()
             if self.mode=='drag':self.play(self.manifest.get('dragAnimation') or self.idles[0],'drag')
+            elif self.mode=='listen':
+                # 聆听短循环在监听期间持续无缝回绕，撑满最长 60 秒；
+                # 由语音结束事件调用 stop_listening() 退出回待机。
+                self.play(self.current,'listen')
+            elif self.mode=='thinking' and self.task_active:self.play(self.current,'thinking')
             elif self.mode=='work-start' and self.task_active:
                 work=self.regular_work_animations()
                 if work:
@@ -702,6 +732,60 @@ class Pet(QWidget):
         if celebration and not self.dock_edge:self.play(celebration,'task-celebration')
         # Play directly so the celebration's interaction line is never shown.
         self.task_result('主人，完成啦！',text,details)
+    def voice_status(self,prompt,status):
+        self.say('主人说：'+prompt+'\n\n'+self.pet_name+'：'+status,0)
+    def voice_completed(self,text,details):
+        self.play_click_sound()
+        celebration=next((v for v in self.variants if v['id']=='18'),None)
+        followup=self.settings.value('voiceFollowup',True,type=bool)
+        if celebration and not followup and not self.dock_edge:self.play(celebration,'task-celebration')
+        self.task_result(self.pet_name+' · 回答',text,details)
+    def voice_controller(self):
+        if self.voice is None:
+            from voice_input import VoiceController
+            self.voice=VoiceController(self)
+        return self.voice
+    def start_voice(self):
+        try:self.voice_controller().start()
+        except Exception as error:self.say('语音唤醒暂时打不开：'+str(error),10000)
+    def set_voice_enabled(self,enabled):
+        self.settings.setValue('voiceEnabled',bool(enabled))
+        if enabled:self.start_voice()
+        elif self.voice:
+            self.end_voice_listening();self.voice.shutdown()
+    def apply_voice_settings(self,name,wake_words,silence,enabled,followup,followup_seconds):
+        old_name=self.pet_name
+        self.pet_name=name;self.setWindowTitle(name+'桌宠')
+        self.settings.setValue('petName',name);self.settings.setValue('wakeWords',wake_words)
+        self.settings.setValue('voiceSilence',float(silence))
+        self.settings.setValue('voiceFollowup',bool(followup))
+        self.settings.setValue('voiceFollowupSeconds',int(followup_seconds))
+        if self.chat:self.chat.apply_pet_name(name)
+        if self.voice and not self.voice.shutdown():
+            self.pet_name=old_name
+            raise RuntimeError('语音线程尚未停止，请稍后再保存设置')
+        self.set_voice_enabled(enabled)
+    def begin_voice_listening(self):
+        self.set_manual_hidden(False)
+        self.undock()
+        if not self.listening:self.start_listening(say_line=False)
+        self.say(self.pet_name+'：主人，我在听…',0)
+    def begin_voice_followup(self):
+        if not self.listening:self.start_listening(say_line=False)
+    def end_voice_listening(self):
+        self.stop_listening()
+    def submit_voice_prompt(self,text):
+        self.end_voice_listening()
+        controller=self.chat_controller()
+        if not controller:
+            if self.voice:self.voice.set_busy(False)
+            return
+        self.voice_status(text,'正在准备回答…')
+        controller.submit(text,mode='chat',source='voice')
+    def show_voice_settings(self):
+        from voice_ui import VoiceSettingsDialog
+        dialog=VoiceSettingsDialog(self)
+        dialog.exec()
     def chat_controller(self):
         if self.chat is None:
             from chat_ui import ChatController
@@ -732,6 +816,9 @@ class Pet(QWidget):
         menu.addSeparator()
         menu.addAction('关闭对话模式' if self.chat and self.chat.enabled else '打开对话模式',self.toggle_chat)
         menu.addAction('查看历史对话',self.open_history)
+        voice=menu.addAction('启用语音唤醒');voice.setCheckable(True)
+        voice.setChecked(self.settings.value('voiceEnabled',False,type=bool));voice.toggled.connect(self.set_voice_enabled)
+        menu.addAction('语音对话设置…',self.show_voice_settings)
         menu.addAction('对话框大小…',self.show_bubble_settings)
         menu.addAction('她此刻的心情…',self.show_mood_panel)
         menu.addAction('编辑人设…',self.show_persona_editor)
@@ -1008,6 +1095,21 @@ class Pet(QWidget):
         self.click_timer.stop();self.last_click=None;self.generation+=1
         try:self.play_click_sound();self.play(item,'variant');self.say(item.get('line',''),4000)
         except Exception as error:self.idle();self.say('唔，主人，这个动作暂时没能准备好：'+str(error))
+    def find_listen_item(self):
+        return next((v for v in self.variants if v.get('id')=='listen'),None)
+    def start_listening(self,say_line=True):
+        """语音输入开始：进入聆听循环动作，持续到 stop_listening。"""
+        item=self.find_listen_item()
+        if item is None:return
+        self.note_interaction(cancel_movement=True)
+        self.click_timer.stop();self.last_click=None;self.generation+=1
+        self.listening=True
+        self.play(item,'listen')
+        if say_line:self.say(item.get('line',''),4000)
+    def stop_listening(self):
+        """语音输入结束：退出聆听循环并回到待机。"""
+        if self.mode=='listen' or self.listening:
+            self.listening=False;self.idle()
     def single_click(self):
         self.last_click=None
         now=time.monotonic()
@@ -1082,6 +1184,8 @@ class Pet(QWidget):
             self.click_timer.stop();self.single_click()
         else:self.last_click=now;self.click_timer.start()
     def closeEvent(self,event):
+        if self.voice and not self.voice.shutdown():
+            event.ignore();QTimer.singleShot(500,self.close);return
         if self.chat and not self.chat.shutdown():
             event.ignore();QTimer.singleShot(500,self.close);return
         self.desktop_sync.stop()

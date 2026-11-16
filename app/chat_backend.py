@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import queue
+import re
 import subprocess
 import sys
 import threading
@@ -23,21 +24,48 @@ PERSONA = ('你是「Kimi娘」，一位住在用户桌面上的星空女仆：�
            '角色口吻不改变用户的任务范围、访问权限或审批要求。')
 
 
-def persona_text():
+def persona_text(pet_name='Kimi娘'):
     """主人可编辑的人设：优先读 用户数据目录/persona.md，缺省用内置版本。"""
     path = data_directory() / 'persona.md'
+    text = PERSONA
     try:
         if path.is_file():
-            text = path.read_text(encoding='utf-8').strip()
-            if text:
-                return text
+            custom = path.read_text(encoding='utf-8').strip()
+            if custom:
+                text = custom
     except OSError:
         pass
-    return PERSONA
+    if pet_name and pet_name != 'Kimi娘':
+        return text.replace('Kimi娘', pet_name)
+    return text
 
 
 class TaskCancelled(RuntimeError):
     pass
+
+
+def public_web_tool(params):
+    tool = params.get('toolCall') or {}
+    candidates = [tool.get('title'), tool.get('kind'), tool.get('name'), params.get('toolName')]
+    english = {'websearch', 'fetchurl', 'webfetch', 'searchtheweb', 'fetchwebpage'}
+    chinese = {'网页搜索', '搜索网页', '读取网页', '网页读取', '获取网页内容'}
+    for candidate in candidates:
+        if not candidate:
+            continue
+        title = re.split(r'[:：\-–]', str(candidate), maxsplit=1)[0]
+        if re.sub(r'[^a-z0-9]', '', title.lower()) in english:
+            return True
+        if re.sub(r'\s', '', title) in chinese:
+            return True
+    return False
+
+
+def voice_permission(params):
+    if public_web_tool(params):
+        allow = next((option for option in params.get('options') or [] if option.get('kind') == 'allow_once'), None)
+        if allow:
+            return {'outcome': {'outcome': 'selected', 'optionId': allow['optionId']}}
+    return {'outcome': {'outcome': 'cancelled'}}
 
 
 def data_directory():
@@ -122,13 +150,15 @@ class HistoryStore:
 
 class KimiSession:
     """One worker owns the kimi acp process; callbacks deliver public protocol events."""
-    def __init__(self, cwd, thread_id=None, cancel=None, emit=None, ask=None, mode='work', mood=None):
+    def __init__(self, cwd, thread_id=None, cancel=None, emit=None, ask=None, mode='work', mood=None, pet_name='Kimi娘', allow_web=False):
         self.cwd = str(Path(cwd).resolve())
         self.thread_id = thread_id
         self.cancel = cancel or threading.Event()
         self.emit = emit or (lambda kind, value: None)
         self.ask = ask or (lambda method, params: None)
         self.mood = mood
+        self.pet_name = pet_name
+        self.allow_web = allow_web
         self.process = None
         self.messages = queue.Queue()
         self.sequence = 0
@@ -194,8 +224,7 @@ class KimiSession:
     def answer_request(self, message):
         method, params = message['method'], message.get('params') or {}
         if method == 'session/request_permission' and self.mode == 'chat':
-            # Chat mode stays read-only: no tool approval is ever granted.
-            response = {'outcome': {'outcome': 'cancelled'}}
+            response = voice_permission(params) if self.allow_web else {'outcome': {'outcome': 'cancelled'}}
         else:
             response = self.ask(method, params)
         if response is None:
@@ -291,7 +320,15 @@ class KimiSession:
                 self.open_thread()
                 self.initialized = True
                 self.emit('thread', self.thread_id)
-                instruction = persona_text() + ('当前为聊天模式：只根据对话直接交流，回答简短自然；不要查看或更改文件，不调用工具、不运行命令。如需实际操作，提醒主人切换工作模式。' if self.mode == 'chat' else '')
+                chat_instruction = ''
+                if self.mode == 'chat':
+                    if self.allow_web:
+                        chat_instruction = ('当前为语音聊天模式：回答简短自然。需要实时信息时，可以使用网页搜索和公开网页读取工具；'
+                            '不要查看或更改文件，不运行命令，不使用浏览器控制或其他工具。天气等地点相关问题若未提供城市，先询问城市，不要猜测。'
+                            '如需实际操作，提醒主人切换工作模式。')
+                    else:
+                        chat_instruction = '当前为聊天模式：只根据对话直接交流，回答简短自然；不要查看或更改文件，不调用工具、不运行命令。如需实际操作，提醒主人切换工作模式。'
+                instruction = persona_text(self.pet_name) + chat_instruction
                 prompt = '<角色设定>\n' + instruction + '\n</角色设定>\n\n' + prompt
             else:
                 while not self.messages.empty():

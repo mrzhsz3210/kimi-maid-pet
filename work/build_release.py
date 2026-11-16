@@ -14,6 +14,9 @@ source=stage/'repository/kimi-maid-pet';portable=stage/'windows/KimiMaidPet'
 source.mkdir(parents=True,exist_ok=True);(source/'app').mkdir(exist_ok=True)
 modules=['platform_support.py','mac_autostart.py','test_platform_support.py','test_preferences.py','desktop_task_sync.py','test_desktop_task_sync.py','pet.py','movement.py','test_movement.py','quota.py','autostart.py','prepare_assets.py','test_pet.py','selftest.py','version.py','test_quota.py','chat_backend.py','chat_ui.py','test_chat.py','desktop_visibility.py','test_visibility.py','test_session_reuse.py','test_task_notifications.py','mood.py','test_mood.py','task_stats.py','test_task_stats.py']
 modules.append('video_frames.py')
+modules.extend(['voice_input.py','voice_models.py','voice_ui.py','test_voice_input.py'])
+(source/'work').mkdir(exist_ok=True)
+shutil.copy2(ROOT/'work/install_voice_models.py',source/'work/install_voice_models.py')
 for name in modules:shutil.copy2(ROOT/'app'/name,source/'app'/name)
 shutil.copytree(ROOT/'app/sounds',source/'app/sounds',dirs_exist_ok=True)
 guide=(ROOT/'work/release_readme.txt').read_text(encoding='utf-8')
@@ -21,7 +24,7 @@ if webm:guide=guide.replace('windows-x64.zip','windows-x64-webm.zip')+'\n透明W
 readme='# Kimi娘桌宠（Kimi Code 版） '+VERSION+'\n\n普通使用者请下载Releases里的 **kimi-maid-pet-v'+VERSION+'-windows-x64.zip**。解压后双击KimiMaidPet.exe；无需Python。\n\n'+guide
 (source/'README.md').write_text(readme,encoding='utf-8')
 (source/'先看我-安装说明.txt').write_text(guide,encoding='utf-8-sig')
-(source/'requirements.txt').write_text('PySide6==6.9.2\nPillow==12.0.0\npsutil==7.0.0\n',encoding='utf-8')
+shutil.copy2(ROOT/'requirements.txt',source/'requirements.txt')
 (source/'.gitignore').write_text('.venv/\n__pycache__/\n*.pyc\napp/cache/\napp/*状态.json\napp/*.jsonl\noutputs/\n发布包/\n.build*/\n*.zip\n检查报告.json\n检查预览.png\n',encoding='utf-8')
 (source/'DEVELOPMENT.md').write_text(r'''# 开发者说明
 
@@ -32,21 +35,23 @@ readme='# Kimi娘桌宠（Kimi Code 版） '+VERSION+'\n\n普通使用者请下�
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -r requirements.txt
 .venv\Scripts\python.exe app\prepare_assets.py
+.venv\Scripts\python.exe work\install_voice_models.py
 .venv\Scripts\python.exe app\pet.py
 .venv\Scripts\python.exe app\test_pet.py
 ```
 
-复刻EXE可安装PyInstaller 6.22.3，使用onedir/windowed模式，以app/pet.py作为入口，显式包含autostart、selftest、version模块。Windows包必须在Windows构建。
+复刻EXE可安装PyInstaller 6.22.3并运行work/build_windows.py；脚本会收集语音、ONNX和麦克风运行库。Windows包必须在Windows构建。
 程序支持--autostart、--enable-autostart、--disable-autostart、--self-test。
 所有播放路径相对发行目录。renderScale和renderOffset控制固定显示校准。
 衍生自 bailong-desktop-pet（已获原作者授权），美术许可见ASSETS.md。
 ''',encoding='utf-8')
-(source/'ASSETS.md').write_text('素材随Releases发布。36段透明WebM动画由项目作者制作；「Kimi娘」形象基于网络开源形象改编，并非完全原创人设，原型权利归其原作者/原许可所有。点击音效为程序合成。\n',encoding='utf-8')
+(source/'ASSETS.md').write_text('素材随Releases发布。51段透明WebM动画由项目作者制作；「Kimi娘」形象基于网络开源形象改编，并非完全原创人设，原型权利归其原作者/原许可所有。点击音效为程序合成。\n',encoding='utf-8')
 (source/'RELEASE_NOTES.md').write_text(f'''Kimi娘桌宠（Kimi Code 版） v{VERSION}
 
 普通用户下载windows-x64-webm.zip，全部解压后双击KimiMaidPet.exe。
-已包含Python、Qt、图像和进程处理依赖、36段动画、点击音效及中文入门说明。
+已包含Python、Qt、图像、进程处理和本地语音运行库、51段动画、点击音效及中文入门说明。
 后端接入 Kimi Code（kimi acp）：桌宠对话模式可直接派发任务，流式输出、权限确认气泡。
+语音输入：右键语音设置可下载外置模型并修改昵称/唤醒词；默认“没药”读作mò yào，也支持Kimi。回答后默认20秒内可免唤醒连续对话。唤醒和识别在本地运行，识别文字发送给Kimi；语音可自动搜索和读取公开网页，但不能修改文件或执行命令。TTS语音回复尚未包含。
 任务同步：只读监听本机 Kimi Code 会话状态文件，CLI 与桌面客户端的任务开始/完成/失败均有气泡提醒。
 工作状态只播工作差分；任务失败播放报错动画（work06）；连点4下触发弹飞彩蛋；吸边双击打开对话模式。
 对话功能需要使用者自己的 Kimi Code CLI 安装、登录与网络；对话历史不随包分发。
@@ -95,7 +100,7 @@ if webm:
     (licenses/'FFmpeg.txt').write_text(license_text+'\nBinary source: https://github.com/imageio/imageio-ffmpeg ; https://github.com/BtbN/FFmpeg-Builds\n',encoding='utf-8')
 python_license=Path(sys.prefix)/'LICENSE_PYTHON.txt'
 if python_license.exists():shutil.copy2(python_license,licenses/'Python.txt')
-for name in ['Pillow','psutil','PySide6','shiboken6']:
+for name in ['Pillow','psutil','PySide6','shiboken6','numpy','sounddevice','sherpa-onnx','sherpa-onnx-core','pypinyin']:
     dist=distribution(name)
     for file in dist.files or []:
         if 'license' in str(file).lower() or 'copying' in str(file).lower():

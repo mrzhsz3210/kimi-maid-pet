@@ -11,7 +11,6 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QTimer
 
 TERMINAL_OK = 'completed'
-MIN_TASK_MS = 8000       # 不足 8 秒的轮次当作快问快答，不报开始也不庆祝
 CELEBRATION_COOLDOWN = 300  # 庆祝动画/音效的冷却（秒）
 
 
@@ -142,9 +141,8 @@ class DesktopTaskSync(QObject):
         record = self.known.setdefault(session, {'seen': set()})
         record.update(reason=reason, updatedAt=updated, running=reason is None, title=title)
         if reason is None:
-            # Turn in flight. 快问快答（未满 MIN_TASK_MS）不算任务，不打扰主人。
-            record.setdefault('running_since', updated)
-            if not record.get('announced') and updated - record['running_since'] >= MIN_TASK_MS:
+            # Turn in flight. 工作动画从轮次开始立即显示，完成提示另有冷却。
+            if not prev_running:
                 record['announced'] = True
                 was_running = bool(self.running)
                 self.running.add(session)

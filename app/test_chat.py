@@ -5,12 +5,18 @@ from pathlib import Path
 import tempfile
 import threading
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-from chat_backend import HistoryStore, KimiSession, TaskCancelled
+from chat_backend import HistoryStore, KimiSession, TaskCancelled, persona_text
 
 
 class BackendTests(unittest.TestCase):
+    def test_custom_pet_name_updates_default_persona(self):
+        with tempfile.TemporaryDirectory() as folder, patch('chat_backend.data_directory',return_value=Path(folder)):
+            text=persona_text('没药')
+            self.assertIn('你是「没药」',text)
+            self.assertNotIn('你是「Kimi娘」',text)
+
     def test_persistence_and_unfinished_recovery(self):
         with tempfile.TemporaryDirectory() as folder:
             store=HistoryStore(folder);chat=store.new(folder)
@@ -51,6 +57,19 @@ class BackendTests(unittest.TestCase):
         s=KimiSession('.',mode='chat')
         with patch.object(s,'send') as send:
             s.answer_request({'id':7,'method':'session/request_permission','params':{'options':[{'optionId':'allow','kind':'allow_once'}]}})
+            response=send.call_args.args[0]
+            self.assertEqual(response['result'],{'outcome':{'outcome':'cancelled'}})
+
+    def test_voice_chat_allows_only_public_web_tools(self):
+        s=KimiSession('.',mode='chat',allow_web=True)
+        web={'toolCall':{'title':'WebSearch'},'options':[{'optionId':'allow','kind':'allow_once'}]}
+        with patch.object(s,'send') as send:
+            s.answer_request({'id':8,'method':'session/request_permission','params':web})
+            response=send.call_args.args[0]
+            self.assertEqual(response['result']['outcome']['outcome'],'selected')
+        command={'toolCall':{'title':'Bash'},'options':[{'optionId':'allow','kind':'allow_once'}]}
+        with patch.object(s,'send') as send:
+            s.answer_request({'id':9,'method':'session/request_permission','params':command})
             response=send.call_args.args[0]
             self.assertEqual(response['result'],{'outcome':{'outcome':'cancelled'}})
 
@@ -108,7 +127,7 @@ class ChatUiTests(unittest.TestCase):
 
     def test_menu_submenus_and_idle_preview(self):
         menu=self.pet.context_menu();actions={a.text():a for a in menu.actions()}
-        self.assertEqual(len(actions['互动差分动画'].menu().actions()),16)
+        self.assertEqual(len(actions['互动差分动画'].menu().actions()),17)
         self.assertEqual(len(actions['工作差分动画'].menu().actions()),6)
         self.assertTrue(actions['工作差分动画'].menu().actions()[0].isEnabled())
         idle=actions['待机差分动画'].menu().actions()
@@ -151,6 +170,34 @@ class ChatUiTests(unittest.TestCase):
         c.window.close();app.processEvents()
         self.assertFalse(c.window.isVisible());self.assertTrue(self.pet.isVisible())
         self.assertEqual(c.window.editor.toPlainText(),'未发送的草稿')
+
+    def test_voice_prompt_does_not_open_composer(self):
+        self.controller.hide()
+        with patch.object(self.controller,'submit') as submit:
+            self.pet.submit_voice_prompt('这是她听见的话')
+            submit.assert_called_once_with('这是她听见的话',mode='chat',source='voice')
+            self.assertFalse(self.controller.composer.isVisible())
+            self.assertIn('她听见的话',self.pet.bubble.findChildren(QLabel)[0].text())
+
+    def test_voice_prompt_uses_separate_read_only_chat(self):
+        c=self.controller;c.active=c.store.new(self.temp.name,mode='work')
+        voice=Mock();self.pet.voice=voice
+        with patch('quota.find_kimi',return_value='kimi'),patch('chat_ui.KimiSession.run',return_value={'threadId':'voice-thread','text':'语音答复','transcript':'语音答复'}):
+            c.submit('语音问题',mode='chat',source='voice')
+            self.assertEqual(c.active['mode'],'chat')
+            self.assertEqual(c.worker.mode,'chat')
+            self.assertTrue(c.worker.allow_web)
+            with patch.object(self.pet,'task_progress') as progress:
+                c.receive('output','不该弹出的流式摘要');c.preview_reply()
+                progress.assert_not_called()
+            for _ in range(30):
+                QTest.qWait(30)
+                if not c.busy:break
+            self.assertFalse(c.busy)
+            self.assertEqual(c.active['turns'][-1]['prompt'],'语音问题')
+            self.assertEqual(self.pet.bubble.findChildren(QLabel)[0].text(),self.pet.pet_name+' · 回答')
+            voice.begin_followup.assert_called_once()
+        self.pet.voice=None
 
     def test_async_worker_does_not_block_and_preserves_thread(self):
         c=self.controller;c.active=c.store.new(self.temp.name)

@@ -1,6 +1,7 @@
 import os
 os.environ['QT_QPA_PLATFORM']='offscreen'
 import math
+import copy
 import random
 import time
 import unittest
@@ -80,9 +81,11 @@ class MovementTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.pet=Pet();cls.pet.tick.stop()
+        cls.saved_mood=copy.deepcopy(cls.pet.mood.state)
 
     @classmethod
     def tearDownClass(cls):
+        cls.pet.mood.state=cls.saved_mood
         cls.pet.close()
 
     def setUp(self):
@@ -90,6 +93,8 @@ class MovementTests(unittest.TestCase):
         p.fullscreen_hidden=False;p.dragging=False;p.pointer_down=False
         p.movement_ready_at=0;p.last_interaction=time.monotonic();p.click_timer.stop()
         p.next_leisure_at=time.monotonic()+15;p.next_leisure_group="idle"
+        for axis in p.mood.state['axes']:p.mood.state['axes'][axis]=p.mood.baseline(axis)
+        p.mood.state['updatedAt']=time.time()
         p.auto_movement_disabled=False
         p.play(p.idles[0],'idle');p.move(200,200);p.bubble.hide()
 

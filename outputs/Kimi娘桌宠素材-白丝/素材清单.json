@@ -285,7 +285,7 @@
       "renderScale": 1.0,
       "renderOffset": [
         0.0,
-        160.0
+        0.0
       ],
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/idle19.webm",
@@ -549,6 +549,22 @@
       "renderAnchor": "bottom-center",
       "playbackFile": "透明WebM/knockback.webm",
       "line": "呜哇！……头、头好晕……",
+      "bubble": "由桌宠程序独立显示"
+    },
+    {
+      "id": "listen",
+      "name": "聆听/听说话",
+      "file": "透明WebM/listen.webm",
+      "durationMs": 4000,
+      "loop": true,
+      "renderScale": 1.0,
+      "renderOffset": [
+        0.0,
+        0.0
+      ],
+      "renderAnchor": "bottom-center",
+      "playbackFile": "透明WebM/listen.webm",
+      "line": "我在听哦，慢慢说～",
       "bubble": "由桌宠程序独立显示"
     }
   ],
