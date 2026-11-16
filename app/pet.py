@@ -154,7 +154,7 @@ class Pet(QWidget):
         self.move(self.constrained_position(QPoint(area.right()-360,area.bottom()-340)))
         for screen in QApplication.screens():self.watch_screen(screen)
         QApplication.instance().screenAdded.connect(self.watch_screen)
-        QApplication.instance().screenRemoved.connect(lambda screen:QTimer.singleShot(0,self.ensure_on_screen))
+        QApplication.instance().screenRemoved.connect(lambda screen:self.log_screen_event('screenRemoved',screen))
         self.idle()
         # User prefers immediate interaction: decode all actions once at startup
         # and retain them even while hidden, without running the animation timer.
@@ -386,8 +386,20 @@ class Pet(QWidget):
         self.click_timer.stop();self.last_click=None;self.last_interaction=time.monotonic()
         self.update()
     def watch_screen(self,screen):
-        screen.availableGeometryChanged.connect(lambda area:self.ensure_on_screen())
+        screen.availableGeometryChanged.connect(lambda area:self.log_screen_event('geometryChanged',screen))
         QTimer.singleShot(0,self.ensure_on_screen)
+    def log_screen_event(self,kind,screen=None):
+        import json as _json
+        from datetime import datetime as _dt
+        try:
+            entry={'time':_dt.now().isoformat(timespec='seconds'),'event':kind}
+            if screen is not None:
+                entry['geometry']=str(screen.geometry());entry['dpr']=screen.devicePixelRatio()
+                entry['screens']=len(QApplication.screens())
+            with open(str(STATE_ROOT/'app'/'可见性日志.jsonl'),'a',encoding='utf-8') as f:
+                f.write(_json.dumps(entry,ensure_ascii=False)+'\n')
+        except OSError:pass
+        if screen is not None:self.ensure_on_screen()
     def ensure_on_screen(self):
         position=self.constrained_position(self.pos())
         if position!=self.pos():

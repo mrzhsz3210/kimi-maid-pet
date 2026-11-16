@@ -69,6 +69,26 @@ class WatcherSyncTests(unittest.TestCase):
         write_state(self.tmp.name,'w','b',title='B',lastTurnReason='completed')
         self.sync.poll()
         self.pet.task_finished.assert_called_once()
+    def test_archived_session_finishes_quietly(self):
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None)
+        self.sync.poll()
+        self.pet.task_started.assert_called_once()
+        write_state(self.tmp.name,'w','s1',title='任务',archived=True)
+        self.sync.poll()
+        self.pet.task_finished.assert_called_once()
+        self.pet.task_completed.assert_not_called()
+        self.pet.task_failed.assert_not_called()
+        self.assertNotIn('s1',self.sync.running)
+        self.assertNotIn('s1',self.sync.known)
+    def test_cancelled_is_not_failure(self):
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason='cancelled')
+        self.sync.poll()
+        self.pet.task_finished.assert_called_once()
+        self.pet.task_completed.assert_not_called()
+        self.pet.task_failed.assert_not_called()
+        self.assertIn('已停下',self.pet.task_progress.call_args.args[0])
     def test_pet_own_sessions_excluded(self):
         own=write_state(self.tmp.name,'w','own-session',title='桌宠自己的任务',lastTurnReason=None)
         self.sync.excluded=lambda:{'own-session'}

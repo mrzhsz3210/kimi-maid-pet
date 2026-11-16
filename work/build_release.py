@@ -76,6 +76,9 @@ for item in items:
         bridge=item['returnTransition']['file'];bridge_dest=dest/bridge
         bridge_dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(assets/bridge,bridge_dest)
 (dest/'素材清单.json').write_text(json.dumps(lean,ensure_ascii=False,indent=2),encoding='utf-8')
+white=ROOT/'outputs/Kimi娘桌宠素材-白丝'
+if white.is_dir():
+    shutil.copytree(white,portable/'outputs/Kimi娘桌宠素材-白丝',dirs_exist_ok=True)
 for name in ['README.md','ASSETS.md','RELEASE_NOTES.md','先看我-安装说明.txt']:shutil.copy2(source/name,portable/name)
 page='<!doctype html><meta charset="utf-8"><title>Kimi娘桌宠安装说明</title><style>body{max-width:850px;margin:40px auto;padding:0 24px;font:17px/1.8 "Microsoft YaHei",sans-serif;color:#453950;background:#fbf8fe}pre{white-space:pre-wrap;font:inherit}</style><pre>'+html.escape(guide)+'</pre>'
 (portable/'先看我-安装说明.html').write_text(page,encoding='utf-8')

@@ -120,7 +120,15 @@ class DesktopTaskSync(QObject):
         if not session or session in excluded:
             return
         updated = data.get('updatedAt') or 0
-        if data.get('archived') or updated < self.born - 60000:
+        if data.get('archived'):
+            # 被归档的会话不再有后续状态；若还在跟踪中，安静地收尾（不庆祝不报警）。
+            if session in self.running:
+                self.running.discard(session)
+                if not self.running and not (self.pet.chat and self.pet.chat.running_turn):
+                    self.pet.task_finished()
+            self.known.pop(session, None)
+            return
+        if updated < self.born - 60000:
             return
         reason = data.get('lastTurnReason')
         title = str(data.get('title') or '未命名任务')[:45]
@@ -157,6 +165,9 @@ class DesktopTaskSync(QObject):
             self.pet.task_finished()
         if reason == TERMINAL_OK:
             self.pet.task_completed('Kimi 已报告「' + title + '」完成，细节请到 Kimi 查看。', lambda: self.details(session))
+        elif reason in ('cancelled', 'interrupted'):
+            # 主人主动停下：不是失败，温和收工。
+            self._progress(session, '主人，任务已停下。', '「' + title + '」已被中止，随时可以再叫我。')
         else:
             if not self.running and not (self.pet.chat and self.pet.chat.running_turn):
                 self.pet.task_failed()
