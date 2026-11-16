@@ -681,7 +681,7 @@
       "file": "透明WebM/move02.webm",
       "durationMs": 11000,
       "moveStartMs": 4000,
-      "moveStopMs": 7600,
+      "moveStopMs": 10000,
       "sourceFacing": "right",
       "renderScale": 1.0,
       "renderOffset": [
@@ -698,7 +698,7 @@
       "file": "透明WebM/move02left.webm",
       "durationMs": 9042,
       "moveStartMs": 4250,
-      "moveStopMs": 7250,
+      "moveStopMs": 8500,
       "sourceFacing": "left",
       "renderScale": 1.0,
       "renderOffset": [
@@ -715,7 +715,7 @@
       "file": "透明WebM/move01left.webm",
       "durationMs": 5042,
       "moveStartMs": 500,
-      "moveStopMs": 3250,
+      "moveStopMs": 4500,
       "sourceFacing": "left",
       "renderScale": 1.0,
       "renderOffset": [
@@ -732,7 +732,7 @@
       "file": "透明WebM/move01right.webm",
       "durationMs": 5042,
       "moveStartMs": 750,
-      "moveStopMs": 3250,
+      "moveStopMs": 4500,
       "sourceFacing": "right",
       "renderScale": 1.0,
       "renderOffset": [
