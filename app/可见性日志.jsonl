@@ -997,3 +997,20 @@
 {"time": "2026-11-16T15:38:24", "from": {"state": [true, false, false], "pos": [1235, 225], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1179, 187], "anim": "move01left"}}
 {"time": "2026-11-16T15:38:26", "from": {"state": [true, false, false], "pos": [1179, 187], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [1088, 126], "anim": "move01left"}}
 {"time": "2026-11-16T15:38:28", "from": {"state": [true, false, false], "pos": [1088, 126], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [1053, 103], "anim": "idle2"}}
+{"time": "2026-11-16T15:42:02", "from": {"state": [true, false, false], "pos": [1346, 571], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1254, 570], "anim": "move02left"}}
+{"time": "2026-11-16T15:42:04", "from": {"state": [true, false, false], "pos": [1254, 570], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1019, 566], "anim": "move02left"}}
+{"time": "2026-11-16T15:42:06", "from": {"state": [true, false, false], "pos": [1019, 566], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [847, 563], "anim": "move02left"}}
+{"time": "2026-11-16T15:42:26", "from": {"state": [true, false, false], "pos": [847, 563], "anim": "idle2"}, "to": {"state": [true, false, false], "pos": [1326, 319], "anim": "landing"}}
+{"time": "2026-11-16T15:54:25", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "movement", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:54:25", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "movement", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": true, "manual": true, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": true, "manual": true, "fullscreen": true, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": true, "manual": true, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:57:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "idle", "autoMoveDisabled": false}

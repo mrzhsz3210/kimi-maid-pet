@@ -184,14 +184,14 @@ class Pet(QWidget):
         if sys.platform=='win32' and QApplication.platformName()!='offscreen':
             self.reassert_timer=QTimer(self);self.reassert_timer.setInterval(30000)
             self.reassert_timer.timeout.connect(self.reassert_window);self.reassert_timer.start()
+        from desktop_task_sync import DesktopTaskSync
+        self.desktop_sync=DesktopTaskSync(self)
+        if QApplication.platformName()!='offscreen':QTimer.singleShot(1500,self.desktop_sync.start)
     def reassert_window(self):
         if self.desktop_hidden():return
         import ctypes
         SWP_NOMOVE=0x2;SWP_NOSIZE=0x1;SWP_NOACTIVATE=0x10;SWP_SHOWWINDOW=0x40
         ctypes.windll.user32.SetWindowPos(int(self.winId()),-1,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_SHOWWINDOW)
-        from desktop_task_sync import DesktopTaskSync
-        self.desktop_sync=DesktopTaskSync(self)
-        if QApplication.platformName()!='offscreen':QTimer.singleShot(1500,self.desktop_sync.start)
     def setup_tray(self):
         # Use the default idle's first frame, independent of the current action.
         icon=QIcon(self.pinned_frames[str(self.asset_path(self.idles[0]))][0])

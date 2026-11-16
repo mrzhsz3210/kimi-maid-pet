@@ -33,7 +33,10 @@ class WatcherSyncTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
     def test_running_then_completed(self):
-        write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason=None,lastPrompt='帮我修问题')
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason=None,lastPrompt='帮我修问题',updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='修问题',lastTurnReason=None,lastPrompt='帮我修问题',updatedAt=base+9000)
         self.sync.poll()
         self.pet.task_started.assert_called_once()
         self.assertIn('收到',self.pet.task_progress.call_args.args[0])
@@ -43,7 +46,10 @@ class WatcherSyncTests(unittest.TestCase):
         self.pet.task_completed.assert_called_once()
         self.assertIn('修问题',self.pet.task_completed.call_args.args[0])
     def test_failure_never_celebrates(self):
-        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None)
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None,updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None,updatedAt=base+9000)
         self.sync.poll()
         write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason='error')
         self.sync.poll()
@@ -55,13 +61,39 @@ class WatcherSyncTests(unittest.TestCase):
                     updatedAt=int((self.now[0]-3600)*1000))
         self.sync.poll()
         self.pet.task_started.assert_not_called()
-    def test_fast_turn_reports_completion_once(self):
+    def test_quick_turn_is_ignored(self):
+        # 快问快答（<8秒）：不报开始也不庆祝
         write_state(self.tmp.name,'w','s1',title='秒完任务',lastTurnReason='completed')
         self.sync.poll();self.sync.poll()
+        self.pet.task_started.assert_not_called()
+        self.pet.task_completed.assert_not_called()
+
+    def test_celebration_cooldown(self):
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason=None,updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason=None,updatedAt=base+9000)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason='completed',updatedAt=base+10000)
+        self.sync.poll()
         self.pet.task_completed.assert_called_once()
+        # 10 秒内第二个任务完成：冷却期，只发普通气泡
+        self.now[0]+=10
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason=None,updatedAt=base+11000)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason=None,updatedAt=base+20000)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason='completed',updatedAt=base+21000)
+        self.sync.poll()
+        self.assertEqual(self.pet.task_completed.call_count,1)
+        self.assertIn('完成啦',self.pet.task_progress.call_args.args[0])
     def test_parallel_sessions_block_finish_until_all_done(self):
-        write_state(self.tmp.name,'w','a',title='A',lastTurnReason=None)
-        write_state(self.tmp.name,'w','b',title='B',lastTurnReason=None)
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason=None,updatedAt=base)
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason=None,updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','a',title='A',lastTurnReason=None,updatedAt=base+9000)
+        write_state(self.tmp.name,'w','b',title='B',lastTurnReason=None,updatedAt=base+9000)
         self.sync.poll()
         write_state(self.tmp.name,'w','a',title='A',lastTurnReason='completed')
         self.sync.poll()
@@ -70,7 +102,10 @@ class WatcherSyncTests(unittest.TestCase):
         self.sync.poll()
         self.pet.task_finished.assert_called_once()
     def test_archived_session_finishes_quietly(self):
-        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None)
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None,updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None,updatedAt=base+9000)
         self.sync.poll()
         self.pet.task_started.assert_called_once()
         write_state(self.tmp.name,'w','s1',title='任务',archived=True)
@@ -81,7 +116,10 @@ class WatcherSyncTests(unittest.TestCase):
         self.assertNotIn('s1',self.sync.running)
         self.assertNotIn('s1',self.sync.known)
     def test_cancelled_is_not_failure(self):
-        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None)
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None,updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason=None,updatedAt=base+9000)
         self.sync.poll()
         write_state(self.tmp.name,'w','s1',title='任务',lastTurnReason='cancelled')
         self.sync.poll()
@@ -95,11 +133,14 @@ class WatcherSyncTests(unittest.TestCase):
         self.sync.poll()
         self.pet.task_started.assert_not_called()
     def test_silent_task_reminder_after_five_minutes(self):
-        data=write_state(self.tmp.name,'w','s1',title='长任务',lastTurnReason=None)
+        base=int(self.now[0]*1000)
+        write_state(self.tmp.name,'w','s1',title='长任务',lastTurnReason=None,updatedAt=base)
+        self.sync.poll()
+        write_state(self.tmp.name,'w','s1',title='长任务',lastTurnReason=None,updatedAt=base+9000)
         self.sync.poll()
         self.pet.task_progress.reset_mock()
         # 文件不再更新（mtime 不变），但任务超过 5 分钟没有动静
-        self.now[0]+=299;self.sync.poll();self.pet.task_progress.assert_not_called()
+        self.now[0]+=308;self.sync.poll();self.pet.task_progress.assert_not_called()
         self.now[0]+=2;self.sync.poll();self.pet.task_progress.assert_called_once()
 
 class DockIntegrationTests(unittest.TestCase):

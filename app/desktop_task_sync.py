@@ -11,6 +11,8 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QTimer
 
 TERMINAL_OK = 'completed'
+MIN_TASK_MS = 8000       # 不足 8 秒的轮次当作快问快答，不报开始也不庆祝
+CELEBRATION_COOLDOWN = 300  # 庆祝动画/音效的冷却（秒）
 
 
 def problem_summary(detail, exit_code=None):
@@ -140,8 +142,10 @@ class DesktopTaskSync(QObject):
         record = self.known.setdefault(session, {'seen': set()})
         record.update(reason=reason, updatedAt=updated, running=reason is None, title=title)
         if reason is None:
-            # Turn in flight.
-            if not prev_running:
+            # Turn in flight. 快问快答（未满 MIN_TASK_MS）不算任务，不打扰主人。
+            record.setdefault('running_since', updated)
+            if not record.get('announced') and updated - record['running_since'] >= MIN_TASK_MS:
+                record['announced'] = True
                 was_running = bool(self.running)
                 self.running.add(session)
                 if not was_running and not (self.pet.chat and self.pet.chat.running_turn):
@@ -149,14 +153,11 @@ class DesktopTaskSync(QObject):
                 prompt = str(data.get('lastPrompt') or '').strip().replace('\n', ' ')[:80]
                 self._progress(session, '主人，我收到啦！',
                                '这就认真帮你留意 Kimi 里的任务。' + ('\n' + prompt if prompt else ''))
-        elif first_seen and not record.get('reported_start'):
-            # Fast turn that finished between two polls: report completion only.
-            self._finish(session, reason, title)
-        elif prev_running:
-            self._finish(session, reason, title)
+        elif record.get('announced') or prev_running:
+            self._finish(session, reason, title, record)
         record['reported_start'] = True
 
-    def _finish(self, session, reason, title):
+    def _finish(self, session, reason, title, record=None):
         self.running.discard(session)
         from platform_support import user_data
         from task_stats import record_task_outcome
@@ -164,7 +165,12 @@ class DesktopTaskSync(QObject):
         if not self.running and not (self.pet.chat and self.pet.chat.running_turn):
             self.pet.task_finished()
         if reason == TERMINAL_OK:
-            self.pet.task_completed('Kimi 已报告「' + title + '」完成，细节请到 Kimi 查看。', lambda: self.details(session))
+            now = self.clock()
+            if now - getattr(self, 'last_celebration', 0) >= CELEBRATION_COOLDOWN:
+                self.last_celebration = now
+                self.pet.task_completed('Kimi 已报告「' + title + '」完成，细节请到 Kimi 查看。', lambda: self.details(session))
+            else:
+                self._progress(session, '主人，完成啦。', '「' + title + '」已报告完成，细节请到 Kimi 查看。')
         elif reason in ('cancelled', 'interrupted'):
             # 主人主动停下：不是失败，温和收工。
             self._progress(session, '主人，任务已停下。', '「' + title + '」已被中止，随时可以再叫我。')
