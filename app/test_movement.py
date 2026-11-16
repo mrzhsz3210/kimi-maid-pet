@@ -8,7 +8,7 @@ import unittest
 from unittest.mock import patch
 from PySide6.QtCore import QPoint
 from PySide6.QtCore import QEvent, Qt, QPointF
-from PySide6.QtGui import QMouseEvent
+from PySide6.QtGui import QMouseEvent, QRegion
 from PySide6.QtWidgets import QApplication
 from movement import plan_movement, movement_fraction
 from pet import Pet
@@ -100,16 +100,36 @@ class MovementTests(unittest.TestCase):
 
     def test_manual_edge_docking_and_recovery(self):
         p=self.pet;area=QApplication.primaryScreen().availableGeometry()
-        for edge,point in [('left',QPoint(area.left(),area.top()+100)),('right',QPoint(area.right()+1-p.width(),area.top()+100))]:
+        for edge,point in [('left',QPoint(area.left(),area.top()+100)),('right',QPoint(area.right()+1-p.width(),area.top()+100)),
+                           ('bottom',QPoint(area.center().x()-p.width()//2,area.bottom()+1-p.height()))]:
             p.move(point);self.assertTrue(p.try_dock());self.assertEqual(p.dock_edge,edge)
             p.last_interaction=time.monotonic()-30;self.assertFalse(p.movement_allowed())
             self.assertLess(p.dock_rect().width(),p.width())
             p.grab();p.ensure_on_screen();self.assertEqual(p.dock_edge,edge)
             p.undock();self.assertIsNone(p.dock_edge)
-        for y in (area.top(),area.bottom()+1-p.height()):
-            p.move(area.center().x()-p.width()//2,y);self.assertFalse(p.try_dock())
+        p.move(area.center().x()-p.width()//2,area.top());self.assertFalse(p.try_dock())
         p.move(area.center()-QPoint(p.width()//2,p.height()//2))
         self.assertFalse(p.try_dock())
+
+    def test_bottom_docking_stays_visible_and_positions_bubble_above(self):
+        p=self.pet;area=QApplication.primaryScreen().availableGeometry()
+        p.move(area.center().x(),area.bottom()+1-p.height())
+        self.assertTrue(p.try_dock())
+        self.assertEqual(p.dock_edge,'bottom')
+        self.assertEqual(p.y(),area.bottom()+1-p.height())
+        p.dock_started=time.monotonic()-1
+        self.assertFalse(QRegion(p.grab().mask()).isEmpty())
+        p.say('底部气泡')
+        self.assertLess(p.bubble.frameGeometry().bottom(),p.y())
+        previous=p.size_percent
+        try:
+            p.set_size_percent(200 if previous!=200 else 150)
+            self.assertEqual(p.y(),area.bottom()+1-p.height())
+            self.assertEqual(p.dock_edge,'bottom')
+        finally:p.set_size_percent(previous)
+        p.begin_undock();start=p.dock_exit[0]
+        with patch('pet.time.monotonic',return_value=start+.31):p.animate()
+        self.assertIsNone(p.dock_edge)
 
     def test_docked_idle_weights_and_pause_other_variants(self):
         p=self.pet;p.dock_edge='left';p.dock_started=time.monotonic()-1

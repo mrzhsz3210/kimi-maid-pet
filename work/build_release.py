@@ -14,7 +14,7 @@ source=stage/'repository/kimi-maid-pet';portable=stage/'windows/KimiMaidPet'
 source.mkdir(parents=True,exist_ok=True);(source/'app').mkdir(exist_ok=True)
 modules=['platform_support.py','mac_autostart.py','test_platform_support.py','test_preferences.py','desktop_task_sync.py','test_desktop_task_sync.py','pet.py','movement.py','test_movement.py','quota.py','autostart.py','prepare_assets.py','test_pet.py','selftest.py','version.py','test_quota.py','chat_backend.py','chat_ui.py','test_chat.py','desktop_visibility.py','test_visibility.py','test_session_reuse.py','test_task_notifications.py','mood.py','test_mood.py','task_stats.py','test_task_stats.py']
 modules.append('video_frames.py')
-modules.extend(['voice_input.py','voice_models.py','voice_ui.py','test_voice_input.py'])
+modules.extend(['voice_input.py','voice_models.py','voice_ui.py','test_voice_input.py','desktop_actions.py','desktop_ui.py','test_desktop_actions.py'])
 (source/'work').mkdir(exist_ok=True)
 shutil.copy2(ROOT/'work/install_voice_models.py',source/'work/install_voice_models.py')
 for name in modules:shutil.copy2(ROOT/'app'/name,source/'app'/name)
@@ -51,6 +51,7 @@ python -m venv .venv
 普通用户下载windows-x64-webm.zip，全部解压后双击KimiMaidPet.exe。
 已包含Python、Qt、图像、进程处理和本地语音运行库、51段动画、点击音效及中文入门说明。
 后端接入 Kimi Code（kimi acp）：桌宠对话模式可直接派发任务，流式输出、权限确认气泡。
+桌面动作：可打开登记程序、浏览器搜索/网页、调节音量、创建本地提醒及打开常用设置页；动作使用白名单，不执行任意命令。
 语音输入：右键语音设置可下载外置模型并修改昵称/唤醒词；默认“没药”读作mò yào，也支持Kimi。回答后默认20秒内可免唤醒连续对话。唤醒和识别在本地运行，识别文字发送给Kimi；语音可自动搜索和读取公开网页，但不能修改文件或执行命令。TTS语音回复尚未包含。
 任务同步：只读监听本机 Kimi Code 会话状态文件，CLI 与桌面客户端的任务开始/完成/失败均有气泡提醒。
 工作状态只播工作差分；任务失败播放报错动画（work06）；连点4下触发弹飞彩蛋；吸边双击打开对话模式。
@@ -100,7 +101,7 @@ if webm:
     (licenses/'FFmpeg.txt').write_text(license_text+'\nBinary source: https://github.com/imageio/imageio-ffmpeg ; https://github.com/BtbN/FFmpeg-Builds\n',encoding='utf-8')
 python_license=Path(sys.prefix)/'LICENSE_PYTHON.txt'
 if python_license.exists():shutil.copy2(python_license,licenses/'Python.txt')
-for name in ['Pillow','psutil','PySide6','shiboken6','numpy','sounddevice','sherpa-onnx','sherpa-onnx-core','pypinyin']:
+for name in ['Pillow','psutil','PySide6','shiboken6','numpy','sounddevice','sherpa-onnx','sherpa-onnx-core','pypinyin','pycaw','comtypes']:
     dist=distribution(name)
     for file in dist.files or []:
         if 'license' in str(file).lower() or 'copying' in str(file).lower():

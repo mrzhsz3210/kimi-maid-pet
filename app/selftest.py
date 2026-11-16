@@ -40,6 +40,9 @@ def run(root):
         assert keyword_pronunciation('没药',None)=='m ò y ào'
         assert keyword_pronunciation('Kimi',None)=='K IH1 M IY0'
         report['checks'].append('本地语音运行库可加载，没药与Kimi唤醒发音配置正常')
+        import desktop_actions,desktop_ui,pycaw.pycaw,comtypes
+        assert '飞行模式' in desktop_actions.SETTINGS_PAGES
+        report['checks'].append('桌面动作界面、白名单与Windows音量运行库可加载')
         assert next(v for v in pet.variants if v['id']=='14') in items
         for item in items:
             assert 'renderScale' in item and 'renderOffset' in item

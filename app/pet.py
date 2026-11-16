@@ -130,6 +130,7 @@ class Pet(QWidget):
         self.bubble.dismiss_requested.connect(self.dismiss_bubble)
         self.chat=None
         self.voice=None
+        self.actions=None
         self.task_active=False
         self.manual_hidden=False;self.fullscreen_hidden=False;self.hidden_since=None
         self.mood=MoodService(user_data())
@@ -193,6 +194,8 @@ class Pet(QWidget):
         if QApplication.platformName()!='offscreen':QTimer.singleShot(1500,self.desktop_sync.start)
         if self.settings.value('voiceEnabled',False,type=bool) and QApplication.platformName()!='offscreen':
             QTimer.singleShot(2000,self.start_voice)
+        if (user_data()/'reminders.json').is_file() and QApplication.platformName()!='offscreen':
+            QTimer.singleShot(2500,self.load_reminders)
     def reassert_window(self):
         if self.desktop_hidden():return
         import ctypes
@@ -379,13 +382,15 @@ class Pet(QWidget):
         if self.chat and self.chat.enabled:return False
         screen=QApplication.screenAt(self.frameGeometry().center()) or QApplication.primaryScreen()
         area=screen.availableGeometry();p=self.pos()
-        gaps={'left':abs(p.x()-area.left()),'right':abs(area.right()+1-p.x()-self.width())}
+        gaps={'left':abs(p.x()-area.left()),'right':abs(area.right()+1-p.x()-self.width()),
+              'bottom':abs(area.bottom()+1-p.y()-self.height())}
         edge=min(gaps,key=gaps.get)
         if gaps[edge]>24:return False
         self.finish_movement();self.dock_edge=edge
         self.dock_started=time.monotonic()
         if edge=='left':p.setX(area.left())
         elif edge=='right':p.setX(area.right()+1-self.width())
+        else:p.setY(area.bottom()+1-self.height())
         self.move(p);self.bubble_timer.stop();self.bubble.hide()
         self.play(self.idles[0],'idle');return True
     def undock(self):
@@ -740,6 +745,19 @@ class Pet(QWidget):
         followup=self.settings.value('voiceFollowup',True,type=bool)
         if celebration and not followup and not self.dock_edge:self.play(celebration,'task-celebration')
         self.task_result(self.pet_name+' · 回答',text,details)
+    def desktop_action_controller(self):
+        if self.actions is None:
+            from desktop_actions import DesktopActions
+            self.actions=DesktopActions(self)
+        return self.actions
+    def load_reminders(self):
+        try:self.desktop_action_controller()
+        except Exception as error:self.say('本地提醒暂时无法读取：'+str(error),10000)
+    def show_desktop_settings(self):
+        from desktop_ui import DesktopSettingsDialog
+        try:dialog=DesktopSettingsDialog(self,self.desktop_action_controller())
+        except Exception as error:self.say('桌面动作设置暂时打不开：'+str(error),10000);return
+        dialog.exec()
     def voice_controller(self):
         if self.voice is None:
             from voice_input import VoiceController
@@ -776,6 +794,12 @@ class Pet(QWidget):
         self.stop_listening()
     def submit_voice_prompt(self,text):
         self.end_voice_listening()
+        try:
+            if self.desktop_action_controller().try_handle(text):return
+        except Exception as error:
+            self.say('本地动作暂时不可用：'+str(error),6000)
+            if self.voice:self.voice.begin_followup()
+            return
         controller=self.chat_controller()
         if not controller:
             if self.voice:self.voice.set_busy(False)
@@ -819,6 +843,7 @@ class Pet(QWidget):
         voice=menu.addAction('启用语音唤醒');voice.setCheckable(True)
         voice.setChecked(self.settings.value('voiceEnabled',False,type=bool));voice.toggled.connect(self.set_voice_enabled)
         menu.addAction('语音对话设置…',self.show_voice_settings)
+        menu.addAction('桌面动作设置…',self.show_desktop_settings)
         menu.addAction('对话框大小…',self.show_bubble_settings)
         menu.addAction('她此刻的心情…',self.show_mood_panel)
         menu.addAction('编辑人设…',self.show_persona_editor)
@@ -1184,6 +1209,7 @@ class Pet(QWidget):
             self.click_timer.stop();self.single_click()
         else:self.last_click=now;self.click_timer.start()
     def closeEvent(self,event):
+        if self.actions:self.actions.shutdown()
         if self.voice and not self.voice.shutdown():
             event.ignore();QTimer.singleShot(500,self.close);return
         if self.chat and not self.chat.shutdown():
