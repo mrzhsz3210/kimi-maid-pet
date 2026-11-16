@@ -1,7 +1,7 @@
-Kimi娘桌宠（Kimi Code 版） v0.1.2 — Windows新手说明
+Kimi娘桌宠（Kimi Code 版） v0.1.3 — Windows新手说明
 
 适用Windows 10/11，Intel/AMD 64位电脑。本包为电脑版，无手机版或Mac安装包。
-下载 kimi-maid-pet-v0.1.2-windows-x64-webm.zip，右键“全部提取”。打开KimiMaidPet文件夹，双击KimiMaidPet.exe。无需安装Python。
+下载 kimi-maid-pet-v0.1.3-windows-x64-webm.zip，右键“全部提取”。打开KimiMaidPet文件夹，双击KimiMaidPet.exe。无需安装Python。
 必须先完整解压，不能只复制exe；_internal、outputs、app必须与exe一起保留。首次启动预加载36段动画，需要等待片刻。
 更新前退出旧桌宠。若开启过自动启动，先在旧文件夹双击“关闭随Kimi自动启动.cmd”，新版本解压后再开启。
 单击互动（双击立即互动，连点4下触发弹飞彩蛋）；拖动可移动，左右屏幕边缘可吸边。吸边时单击展开，双击打开对话模式。

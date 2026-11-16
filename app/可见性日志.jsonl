@@ -916,3 +916,13 @@
 {"time": "2026-11-16T15:17:34", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "movement", "autoMoveDisabled": false}
 {"time": "2026-11-16T15:20:17", "hidden": true, "manual": false, "fullscreen": true, "culprit": null, "mode": "working", "autoMoveDisabled": false}
 {"time": "2026-11-16T15:20:17", "hidden": false, "manual": false, "fullscreen": false, "culprit": null, "mode": "working", "autoMoveDisabled": false}
+{"time": "2026-11-16T15:21:08", "from": {"state": [true, false, false], "pos": [1346, 571], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1292, 535], "anim": "move02left"}}
+{"time": "2026-11-16T15:21:10", "from": {"state": [true, false, false], "pos": [1292, 535], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1151, 441], "anim": "move02left"}}
+{"time": "2026-11-16T15:21:12", "from": {"state": [true, false, false], "pos": [1151, 441], "anim": "move02left"}, "to": {"state": [true, false, false], "pos": [1048, 373], "anim": "move02left"}}
+{"time": "2026-11-16T15:21:26", "from": {"state": [true, false, false], "pos": [1048, 373], "anim": "18"}, "to": {"state": [true, false, false], "pos": [1350, 358], "anim": "landing"}}
+{"time": "2026-11-16T15:21:38", "from": {"state": [true, false, false], "pos": [1350, 358], "anim": "idle2"}, "to": {"state": [true, false, false], "pos": [1296, 320], "anim": "move01left"}}
+{"time": "2026-11-16T15:21:40", "from": {"state": [true, false, false], "pos": [1296, 320], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [1203, 256], "anim": "move01left"}}
+{"time": "2026-11-16T15:21:42", "from": {"state": [true, false, false], "pos": [1203, 256], "anim": "move01left"}, "to": {"state": [true, false, false], "pos": [1164, 229], "anim": "idle"}}
+{"time": "2026-11-16T15:22:08", "from": {"state": [true, false, false], "pos": [1164, 229], "anim": "idle"}, "to": {"state": [true, false, false], "pos": [1192, 241], "anim": "move01right"}}
+{"time": "2026-11-16T15:22:10", "from": {"state": [true, false, false], "pos": [1192, 241], "anim": "move01right"}, "to": {"state": [true, false, false], "pos": [1271, 275], "anim": "move01right"}}
+{"time": "2026-11-16T15:22:12", "from": {"state": [true, false, false], "pos": [1271, 275], "anim": "move01right"}, "to": {"state": [true, false, false], "pos": [1312, 292], "anim": "idle"}}
