@@ -180,6 +180,15 @@ class Pet(QWidget):
         self.visibility_timer=QTimer(self);self.visibility_timer.setInterval(500)
         self.visibility_timer.timeout.connect(self.check_fullscreen)
         if QApplication.platformName()!='offscreen':self.visibility_timer.start()
+        # Windows 分层透明窗口偶发 DWM 合成丢失（可见但画不出来）；定期重建合成状态。
+        if sys.platform=='win32' and QApplication.platformName()!='offscreen':
+            self.reassert_timer=QTimer(self);self.reassert_timer.setInterval(30000)
+            self.reassert_timer.timeout.connect(self.reassert_window);self.reassert_timer.start()
+    def reassert_window(self):
+        if self.desktop_hidden():return
+        import ctypes
+        SWP_NOMOVE=0x2;SWP_NOSIZE=0x1;SWP_NOACTIVATE=0x10;SWP_SHOWWINDOW=0x40
+        ctypes.windll.user32.SetWindowPos(int(self.winId()),-1,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOACTIVATE|SWP_SHOWWINDOW)
         from desktop_task_sync import DesktopTaskSync
         self.desktop_sync=DesktopTaskSync(self)
         if QApplication.platformName()!='offscreen':QTimer.singleShot(1500,self.desktop_sync.start)
